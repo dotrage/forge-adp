@@ -74,6 +74,7 @@ Forge is built around four core principles:
     │                    INTEGRATION LAYER                          │
     │  Jira · GitHub · GitLab · Slack · Teams · Google Chat        │
     │  Confluence · Linear · PagerDuty · Opsgenie                  │
+    │  Datadog · Grafana                                           │
     └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -135,6 +136,8 @@ pip install ruff black mypy
 | Google Chat | Team communication | `GOOGLE_CHAT_WEBHOOK_URL`, `GOOGLE_CHAT_VERIFICATION_TOKEN` |
 | PagerDuty | Incident management | `PAGERDUTY_API_KEY`, `PAGERDUTY_SERVICE_ID`, `PAGERDUTY_FROM_EMAIL` |
 | Opsgenie | Alert management | `OPSGENIE_API_KEY` |
+| Datadog | Metrics & monitoring | `DATADOG_API_KEY`, `DATADOG_APP_KEY` |
+| Grafana | Dashboards & alerting | `GRAFANA_URL`, `GRAFANA_API_KEY` |
 | AWS / GCP / Azure | Cloud infrastructure | Provider-specific credentials |
 
 ---
@@ -287,6 +290,10 @@ Product owner drops a PRD in Slack
 | `PAGERDUTY_SERVICE_ID` | No¹ | — | PagerDuty service ID used when creating incidents |
 | `PAGERDUTY_FROM_EMAIL` | No¹ | — | Email address for PagerDuty `From` header (required by some accounts) |
 | `OPSGENIE_API_KEY` | No¹ | — | Opsgenie API key |
+| `DATADOG_API_KEY` | No¹ | — | Datadog API key |
+| `DATADOG_APP_KEY` | No¹ | — | Datadog application key (required for monitor management) |
+| `GRAFANA_URL` | No¹ | — | Grafana instance base URL (e.g. `https://grafana.acme.com`) |
+| `GRAFANA_API_KEY` | No¹ | — | Grafana service account token or API key |
 
 > ¹ Required only when the corresponding adapter is enabled for your deployment.
 | `FORGE_LOG_LEVEL` | No | `info` | Log level: `debug`, `info`, `warn`, `error` |
@@ -426,6 +433,8 @@ Each adapter runs as an independent service and communicates with the rest of th
 | **Linear** | `:8097` | `Issue create` → `task.created`; `Issue update` → `task.completed`; `Issue remove` → `task.failed` | `GET/POST /api/v1/issues`, `POST /api/v1/transitions` |
 | **PagerDuty** | `:8098` | `incident.trigger` → `escalation.created`; `incident.resolve` → `task.completed` | `POST /api/v1/incidents`, `PUT /api/v1/incidents?id=` |
 | **Opsgenie** | `:8099` | `Create` → `escalation.created`; `Close` → `task.completed` | `POST /api/v1/alerts`, `DELETE /api/v1/alerts?id=`, `PATCH /api/v1/alerts?id=` |
+| **Datadog** | `:8100` | `Triggered`/`No Data` → `escalation.created`; `Recovered` → `task.completed` | `POST /api/v1/events` |
+| **Grafana** | `:8101` | `firing` → `escalation.created`; `resolved` → `task.completed` | `POST /api/v1/annotations`, `POST /api/v1/silences` |
 
 Webhook security:
 - **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
@@ -435,6 +444,8 @@ Webhook security:
 - **Google Chat** — Verification token (`GOOGLE_CHAT_VERIFICATION_TOKEN`)
 - **PagerDuty** — Webhook signature validation via PagerDuty's `X-PagerDuty-Signature` header (configure in PagerDuty webhook settings)
 - **Opsgenie** — Webhook validation via Opsgenie's HMAC-SHA256 signature on the request body
+- **Datadog** — Webhook validation via Datadog's `X-Datadog-Signature` header (configure shared secret in Datadog webhook integration settings)
+- **Grafana** — Webhook validation via Grafana's `X-Grafana-Signature` header (configure shared secret in Grafana contact point settings)
 
 ### Makefile Commands
 
