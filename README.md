@@ -72,7 +72,8 @@ Forge is built around four core principles:
            │          │          │
     ┌──────┴──────────┴──────────┴─────────────────────────────────┐
     │                    INTEGRATION LAYER                          │
-    │   Slack Adapter   |   Jira Adapter   |   GitHub Adapter      │
+    │  Jira · GitHub · GitLab · Slack · Teams · Google Chat        │
+    │  Confluence · Linear                                         │
     └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -124,9 +125,14 @@ pip install ruff black mypy
 | Service | Purpose | Environment Variable |
 |---|---|---|
 | Anthropic (Claude) | LLM provider | `ANTHROPIC_API_KEY` |
-| GitHub | Source control | `GITHUB_TOKEN` |
+| GitHub | Source control | `GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET` |
+| GitLab | Source control (self-hosted or GitLab.com) | `GITLAB_TOKEN`, `GITLAB_BASE_URL`, `GITLAB_WEBHOOK_SECRET` |
 | Jira (Atlassian) | Project management | `JIRA_API_TOKEN`, `JIRA_BASE_URL`, `JIRA_USER_EMAIL` |
-| Slack | Communication | `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` |
+| Confluence (Atlassian) | Documentation & specs | `CONFLUENCE_BASE_URL`, `CONFLUENCE_USERNAME`, `CONFLUENCE_API_TOKEN` |
+| Linear | Issue tracking | `LINEAR_API_KEY`, `LINEAR_WEBHOOK_SECRET` |
+| Slack | Team communication | `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` |
+| Microsoft Teams | Team communication | `TEAMS_WEBHOOK_URL`, `TEAMS_HMAC_SECRET` |
+| Google Chat | Team communication | `GOOGLE_CHAT_WEBHOOK_URL`, `GOOGLE_CHAT_VERIFICATION_TOKEN` |
 | AWS / GCP / Azure | Cloud infrastructure | Provider-specific credentials |
 
 ---
@@ -257,11 +263,26 @@ Product owner drops a PRD in Slack
 | `REDIS_URL` | Yes | `redis://localhost:6379` | Redis / message bus URL |
 | `ANTHROPIC_API_KEY` | Yes | — | Anthropic Claude API key |
 | `GITHUB_TOKEN` | Yes | — | GitHub personal access token |
+| `GITHUB_WEBHOOK_SECRET` | Yes | — | Secret used to validate GitHub webhook payloads |
+| `GITLAB_TOKEN` | No¹ | — | GitLab personal access token |
+| `GITLAB_BASE_URL` | No¹ | `https://gitlab.com` | GitLab instance base URL (override for self-hosted) |
+| `GITLAB_WEBHOOK_SECRET` | No¹ | — | Secret used to validate GitLab webhook `X-Gitlab-Token` header |
 | `JIRA_BASE_URL` | Yes | — | Jira instance URL (e.g. `https://acme.atlassian.net`) |
 | `JIRA_USER_EMAIL` | Yes | — | Jira account email |
 | `JIRA_API_TOKEN` | Yes | — | Jira API token |
-| `SLACK_BOT_TOKEN` | Yes | — | Slack bot OAuth token |
-| `SLACK_APP_TOKEN` | Yes | — | Slack app-level token (socket mode) |
+| `CONFLUENCE_BASE_URL` | No¹ | — | Confluence instance URL (e.g. `https://acme.atlassian.net`) |
+| `CONFLUENCE_USERNAME` | No¹ | — | Confluence account email |
+| `CONFLUENCE_API_TOKEN` | No¹ | — | Confluence API token |
+| `LINEAR_API_KEY` | No¹ | — | Linear API key |
+| `LINEAR_WEBHOOK_SECRET` | No¹ | — | Secret used to validate Linear webhook HMAC-SHA256 signatures |
+| `SLACK_BOT_TOKEN` | No¹ | — | Slack bot OAuth token |
+| `SLACK_APP_TOKEN` | No¹ | — | Slack app-level token (socket mode) |
+| `TEAMS_WEBHOOK_URL` | No¹ | — | Microsoft Teams incoming webhook URL |
+| `TEAMS_HMAC_SECRET` | No¹ | — | HMAC secret for validating Teams bot activity payloads |
+| `GOOGLE_CHAT_WEBHOOK_URL` | No¹ | — | Google Chat space webhook URL |
+| `GOOGLE_CHAT_VERIFICATION_TOKEN` | No¹ | — | Token for verifying inbound Google Chat events |
+
+> ¹ Required only when the corresponding adapter is enabled for your deployment.
 | `FORGE_LOG_LEVEL` | No | `info` | Log level: `debug`, `info`, `warn`, `error` |
 | `FORGE_AUTONOMY_LEVEL` | No | `0` | Default autonomy level (0–3) for all agents |
 | `FORGE_COMPANY_ID` | Yes | — | Tenant/company identifier |
@@ -295,9 +316,22 @@ integrations:
   github:
     repo: acme-corp/my-project
     base_branch: main
+  # gitlab:                        # Use instead of (or alongside) github
+  #   project_id: "12345"
+  #   base_branch: main
+  confluence:
+    space_key: ACME
+    agent_label: forge             # Pages with this label trigger task.created
+  linear:
+    team_id: "abc123"
+    agent_label: forge             # Issues with this label trigger task.created
   slack:
     notification_channel: "#eng-forge"
     escalation_channel: "#eng-leads"
+  # teams:
+  #   notification_channel: forge-notifications
+  # google_chat:
+  #   space_name: spaces/XXXXXXXX
 
 policy:
   require_secops_review: true
@@ -369,6 +403,28 @@ All services expose a JSON REST API. The Orchestrator is the primary entry point
 | `POST` | `/v1/evaluate` | Evaluate a proposed agent action against policies |
 | `GET` | `/v1/policies` | List active policies |
 | `PUT` | `/v1/policies/{name}` | Update a policy definition |
+
+### Integration Adapters
+
+Each adapter runs as an independent service and communicates with the rest of the system via the message bus. All adapters expose a `/health` endpoint and a `/webhook` endpoint for inbound events from the external platform.
+
+| Adapter | Port | Inbound (webhooks) | Outbound (API) |
+|---|---|---|---|
+| **Jira** | `:8090` | `jira:issue_created` → `task.created`; `jira:issue_updated` | `GET/POST /api/v1/tickets`, `POST /api/v1/transitions` |
+| **GitHub** | `:8091` | `PullRequestEvent` → `review.requested`/`task.completed`; `CheckSuiteEvent` | `POST /api/v1/branches`, `POST /api/v1/pulls`, `/api/v1/commits` |
+| **Slack** | `:8092` | Slash commands, interactive payloads | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **Teams** | `:8093` | Bot Framework activity endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **Google Chat** | `:8094` | Chat event endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **GitLab** | `:8095` | `MergeEvent` → `review.requested`/`task.completed`; `PipelineEvent` → `deployment.approved`/`task.failed` | `POST /api/v1/branches`, `POST /api/v1/mergerequests`, `/api/v1/commits` |
+| **Confluence** | `:8096` | `page_created` → `task.created` (when page carries `forge` label) | `GET/POST/PUT /api/v1/pages`, `GET /api/v1/spaces` |
+| **Linear** | `:8097` | `Issue create` → `task.created`; `Issue update` → `task.completed`; `Issue remove` → `task.failed` | `GET/POST /api/v1/issues`, `POST /api/v1/transitions` |
+
+Webhook security:
+- **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
+- **GitLab** — Static token header (`GITLAB_WEBHOOK_SECRET` → `X-Gitlab-Token`)
+- **Linear** — HMAC-SHA256 (`LINEAR_WEBHOOK_SECRET` → `Linear-Signature`)
+- **Teams** — HMAC-SHA256 (`TEAMS_HMAC_SECRET`)
+- **Google Chat** — Verification token (`GOOGLE_CHAT_VERIFICATION_TOKEN`)
 
 ### Makefile Commands
 

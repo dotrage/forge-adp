@@ -20,6 +20,9 @@ run-local:
 	go run ./cmd/adapters/jira &
 	go run ./cmd/adapters/github &
 	go run ./cmd/adapters/slack &
+	go run ./cmd/adapters/gitlab &
+	go run ./cmd/adapters/confluence &
+	go run ./cmd/adapters/linear &
 
 test:
 	go test ./...
