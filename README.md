@@ -75,7 +75,14 @@ Forge is built around four core principles:
     │  Jira · GitHub · GitLab · Slack · Teams · Google Chat        │
     │  Confluence · Linear · PagerDuty · Opsgenie                  │
     │  Datadog · Grafana · Snyk · SonarQube                        │
-    │  Terraform Cloud · Atlantis                                  │
+    │  Terraform Cloud · Atlantis · MongoDB Atlas · Databricks     │
+    │  Vercel · Bitbucket · Azure DevOps · Jenkins · CircleCI      │
+    │  ArgoCD · GitHub Actions · GitLab CI · Sentry · New Relic   │
+    │  Splunk · AWS · Azure Monitor · GCP · HashiCorp Vault        │
+    │  Wiz · Prisma Cloud · Checkov · Trivy · Shortcut · Notion   │
+    │  LaunchDarkly · Split.io · Backstage · TestRail · Xray       │
+    │  BrowserStack · Sauce Labs · Zephyr Scale · Postman          │
+    │  Newman · Cypress Cloud · k6 Cloud · Applitools              │
     └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -143,6 +150,42 @@ pip install ruff black mypy
 | SonarQube | Static code analysis | `SONARQUBE_URL`, `SONARQUBE_TOKEN`, `SONARQUBE_WEBHOOK_SECRET` |
 | Terraform Cloud | IaC plan & apply automation | `TFC_TOKEN`, `TFC_ORGANIZATION`, `TFC_WEBHOOK_HMAC_KEY` |
 | Atlantis | GitOps Terraform automation | `ATLANTIS_URL`, `ATLANTIS_TOKEN`, `ATLANTIS_WEBHOOK_SECRET` |
+| MongoDB Atlas | Database monitoring & alerts | `MONGODB_ATLAS_PUBLIC_KEY`, `MONGODB_ATLAS_PRIVATE_KEY`, `MONGODB_ATLAS_PROJECT_ID`, `MONGODB_ATLAS_WEBHOOK_SECRET` |
+| Databricks | Unified data & AI platform | `DATABRICKS_HOST`, `DATABRICKS_TOKEN` |
+| Vercel | Frontend deployment platform | `VERCEL_TOKEN`, `VERCEL_TEAM_ID`, `VERCEL_WEBHOOK_SECRET` |
+| Bitbucket | Source control (Atlassian) | `BITBUCKET_URL`, `BITBUCKET_USERNAME`, `BITBUCKET_APP_PASSWORD`, `BITBUCKET_WEBHOOK_SECRET` |
+| Azure DevOps Repos | Source control (Microsoft) | `AZDO_ORG_URL`, `AZDO_TOKEN` |
+| Jenkins | CI/CD automation server | `JENKINS_URL`, `JENKINS_USER`, `JENKINS_API_TOKEN`, `JENKINS_WEBHOOK_SECRET` |
+| CircleCI | Cloud CI/CD | `CIRCLECI_TOKEN`, `CIRCLECI_WEBHOOK_SECRET` |
+| ArgoCD | GitOps delivery (Kubernetes) | `ARGOCD_URL`, `ARGOCD_TOKEN` |
+| GitHub Actions | CI/CD built into GitHub | `GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET` (shared with GitHub adapter) |
+| GitLab CI | CI/CD built into GitLab | `GITLAB_TOKEN`, `GITLAB_BASE_URL`, `GITLAB_WEBHOOK_SECRET` (shared with GitLab adapter) |
+| Sentry | Error tracking & performance | `SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_WEBHOOK_SECRET` |
+| New Relic | Observability platform | `NEW_RELIC_API_KEY`, `NEW_RELIC_ACCOUNT_ID` |
+| Splunk | SIEM & log analytics | `SPLUNK_URL`, `SPLUNK_HEC_TOKEN` |
+| AWS | Cloud infrastructure | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` |
+| Azure Monitor | Azure observability | `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_SUBSCRIPTION_ID` |
+| GCP | Google Cloud infrastructure | `GCP_PROJECT_ID`, `GCP_PUBSUB_SUBSCRIPTION` |
+| HashiCorp Vault | Secrets management | `VAULT_ADDR`, `VAULT_TOKEN`, `VAULT_NAMESPACE` |
+| Wiz | Cloud security posture | `WIZ_CLIENT_ID`, `WIZ_CLIENT_SECRET` |
+| Prisma Cloud | Cloud-native security | `PRISMA_ACCESS_KEY`, `PRISMA_SECRET_KEY`, `PRISMA_API_URL` |
+| Checkov | IaC static analysis | `BRIDGECREW_API_TOKEN` |
+| Trivy | Container vulnerability scanner | (no auth required for webhook receiver) |
+| Azure DevOps Boards | Work item tracking (Microsoft) | `AZDO_ORG_URL`, `AZDO_TOKEN` (shared with Azure DevOps Repos) |
+| Shortcut | Issue tracking (fmr. Clubhouse) | `SHORTCUT_API_TOKEN`, `SHORTCUT_WEBHOOK_SECRET` |
+| Notion | Docs & project management | `NOTION_TOKEN` |
+| LaunchDarkly | Feature flag management | `LAUNCHDARKLY_API_KEY`, `LAUNCHDARKLY_SDK_KEY` |
+| Split.io | Feature flags & experimentation | `SPLIT_API_KEY` |
+| Backstage | Internal developer portal | `BACKSTAGE_URL`, `BACKSTAGE_TOKEN` |
+| TestRail | Test case management | `TESTRAIL_URL`, `TESTRAIL_USER`, `TESTRAIL_API_KEY` |
+| Xray | Test management (Jira plugin) | `XRAY_CLIENT_ID`, `XRAY_CLIENT_SECRET` |
+| BrowserStack | Cross-browser test automation | `BROWSERSTACK_USER`, `BROWSERSTACK_ACCESS_KEY` |
+| Sauce Labs | Cross-browser test automation | `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY` |
+| Zephyr Scale | Jira-native test management | `ZEPHYR_API_TOKEN`, `ZEPHYR_PROJECT_KEY`, `ZEPHYR_WEBHOOK_SECRET` |
+| Postman | API test collections & monitors | `POSTMAN_API_KEY` |
+| Cypress Cloud | E2E test recording & results | `CYPRESS_API_KEY`, `CYPRESS_PROJECT_ID`, `CYPRESS_WEBHOOK_SECRET` |
+| k6 Cloud / Grafana k6 | Performance & load testing | `K6_CLOUD_API_TOKEN`, `K6_PROJECT_ID` |
+| Applitools | Visual regression testing | `APPLITOOLS_API_KEY`, `APPLITOOLS_WEBHOOK_SECRET` |
 | AWS / GCP / Azure | Cloud infrastructure | Provider-specific credentials |
 
 ---
@@ -456,6 +499,37 @@ Each adapter runs as an independent service and communicates with the rest of th
 | **SonarQube** | `:8103` | `analysis.completed` quality gate `ERROR` → `escalation.created`; `FAILED`/`CANCELLED` → `task.failed` | `GET /api/v1/issues`, `GET /api/v1/qualitygates` |
 | **Terraform Cloud** | `:8104` | `applied` → `task.completed`; `planned_and_finished` → `deployment.approved`; `errored`/`canceled` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/workspaces` |
 | **Atlantis** | `:8105` | `plan success` → `deployment.requested`; `apply success` → `task.completed`; `failure`/`error` → `task.failed` | `POST /api/v1/plan`, `POST /api/v1/apply` |
+| **MongoDB Atlas** | `:8106` | `ALERT_OPENED` → `escalation.created`; `ALERT_CLOSED` → `task.completed` | `GET /api/v1/alerts`, `GET /api/v1/clusters` |
+| **Databricks** | `:8107` | `TERMINATED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `GET /api/v1/jobs`, `GET /api/v1/runs` |
+| **Vercel** | `:8108` | `deployment.succeeded` → `task.completed`; `deployment.error` → `task.failed`; `deployment.ready` → `deployment.approved` | `GET /api/v1/deployments`, `GET /api/v1/projects` |
+| **Bitbucket** | `:8109` | `pullrequest:created` → `review.requested`; `fulfilled` → `task.completed`; `rejected` → `review.rejected` | `GET /api/v1/pullrequests`, `POST /api/v1/comments` |
+| **Azure DevOps Repos** | `:8110` | `git.pullrequest.created` → `review.requested`; merged → `task.completed` | `GET /api/v1/pullrequests`, `GET /api/v1/repos` |
+| **Jenkins** | `:8111` | `STARTED` → `task.started`; `COMPLETED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `POST /api/v1/jobs/build`, `GET /api/v1/jobs` |
+| **CircleCI** | `:8112` | `workflow-completed/success` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/pipelines`, `GET /api/v1/workflows` |
+| **ArgoCD** | `:8113` | `Succeeded` → `deployment.approved`; `Failed` → `task.failed`; `Running` → `task.started` | `GET /api/v1/applications`, `POST /api/v1/sync` |
+| **GitHub Actions / GitLab CI** | `:8114` | `workflow_run completed` → `task.completed`/`task.failed`; GitLab pipeline success/failure | (webhook only) |
+| **Sentry** | `:8115` | `created` (error/fatal) → `escalation.created`; `resolved` → `task.completed` | `GET /api/v1/issues`, `POST /api/v1/comments` |
+| **New Relic** | `:8116` | `open` (CRITICAL) → `escalation.created`; `closed` → `task.completed` | `GET /api/v1/alerts`, `POST /api/v1/events` |
+| **Splunk** | `:8117` | Alert webhook → `escalation.created`; republishes bus events to Splunk HEC | `POST /api/v1/search`, `GET /api/v1/jobs` |
+| **AWS** | `:8118` | SNS `ALARM` → `escalation.created`; `OK` → `task.completed`; auto-confirms SNS subscriptions | (webhook only) |
+| **Azure Monitor / Azure DevOps** | `:8119` | `Fired` → `escalation.created`; `Resolved` → `task.completed`; ADO `build.complete` → `task.completed`/`task.failed` | `GET /api/v1/alerts`, `GET /api/v1/builds` |
+| **GCP** | `:8120` | Pub/Sub Cloud Build `SUCCESS` → `task.completed`; `FAILURE` → `task.failed`; Cloud Monitoring open → `escalation.created` | (Pub/Sub push only) |
+| **HashiCorp Vault** | `:8121` | Audit log errors → `escalation.created` | `GET /api/v1/secrets`, `POST /api/v1/leases` |
+| **Wiz / Prisma Cloud** | `:8122` | OPEN CRITICAL/HIGH → `escalation.created`; RESOLVED → `task.completed` (both platforms) | `GET /api/v1/issues` |
+| **Checkov / Trivy** | `:8123` | Checkov violations → `escalation.created`/`task.blocked`; Trivy SARIF errors → `escalation.created` | (webhook only) |
+| **Azure DevOps Boards** | `:8124` | `workitem.created` (tagged `forge`) → `task.created`; state `Done` → `task.completed`; `Removed` → `task.failed` | `GET /api/v1/workitems`, `PATCH /api/v1/workitems` |
+| **Shortcut** | `:8125` | `story create` → `task.created`; `completed_at` set → `task.completed` | `GET /api/v1/stories`, `POST /api/v1/stories` |
+| **Notion** | `:8126` | `page_created` → `task.created`; `page_updated` → `task.completed` | `GET/POST /api/v1/pages`, `GET /api/v1/databases` |
+| **LaunchDarkly** | `:8127` | Flag changed → `task.completed` | `GET /api/v1/flags`, `GET /api/v1/environments` |
+| **Split.io** | `:8128` | `SPLIT_KILLED` → `escalation.created`; `SPLIT_UPDATED` → `task.completed` | `GET /api/v1/splits`, `POST /api/v1/toggles` |
+| **Backstage** | `:8129` | Scaffolder `completed` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/entities`, `GET /api/v1/components` |
+| **TestRail / Xray** | `:8130` | Test run completed (failures) → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/runs`, `GET /api/v1/results` |
+| **BrowserStack / Sauce Labs** | `:8131` | Build `done`/`complete` with failures → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/builds`, `GET /api/v1/sessions` |
+| **Zephyr Scale** | `:8132` | `testCycle_updated` DONE/PASSED → `task.completed`; FAILED → `task.blocked`; `testExecution_updated` FAIL → `escalation.created` | `GET/POST /api/v1/cycles`, `GET/POST /api/v1/executions`, `GET /api/v1/cases` |
+| **Postman / Newman** | `:8133` | Monitor `passed` → `task.completed`; `failed` → `escalation.created`; Newman report failures → `task.blocked` | `GET /api/v1/collections`, `GET /api/v1/monitors`, `POST /api/v1/runs` |
+| **Cypress Cloud** | `:8134` | `RUN_COMPLETED` passed → `task.completed`; failed/errored → `task.blocked` | `GET /api/v1/runs`, `GET /api/v1/instances` |
+| **k6 Cloud** | `:8135` | `TEST_FINISHED` passed → `task.completed`; threshold breach → `escalation.created`; `TEST_ABORTED` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/thresholds` |
+| **Applitools** | `:8136` | `batchCompleted` Passed → `task.completed`; Failed → `task.blocked`; Unresolved → `review.requested` | `GET /api/v1/batches`, `GET /api/v1/results`, `GET/DELETE /api/v1/baselines` |
 
 Webhook security:
 - **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
@@ -471,6 +545,40 @@ Webhook security:
 - **SonarQube** — HMAC-SHA256 (`SONARQUBE_WEBHOOK_SECRET` → `X-Sonar-Webhook-HMAC-SHA256`)
 - **Terraform Cloud** — HMAC-SHA512 (`TFC_WEBHOOK_HMAC_KEY` → `X-TFE-Notification-Signature`)
 - **Atlantis** — HMAC-SHA256 (`ATLANTIS_WEBHOOK_SECRET` → `X-Atlantis-Signature`)
+- **MongoDB Atlas** — HMAC-SHA1 (`MONGODB_ATLAS_WEBHOOK_SECRET` → `X-MMS-Signature`)
+- **Databricks** — Bearer token (`DATABRICKS_TOKEN` → `Authorization`)
+- **Vercel** — HMAC-SHA1 (`VERCEL_WEBHOOK_SECRET` → `X-Vercel-Signature`)
+- **Bitbucket** — HMAC-SHA256 (`BITBUCKET_WEBHOOK_SECRET` → `X-Hub-Signature`)
+- **Azure DevOps Repos** — HMAC-SHA256 (`AZDO_TOKEN` → `X-Hub-Signature-256`) + Basic auth
+- **Jenkins** — HMAC-SHA256 (`JENKINS_WEBHOOK_SECRET` → `X-Jenkins-Signature`)
+- **CircleCI** — HMAC-SHA256 (`CIRCLECI_WEBHOOK_SECRET` → `Circleci-Signature`, `v1=` prefix)
+- **ArgoCD** — Bearer token (`ARGOCD_TOKEN` → `Authorization`)
+- **GitHub Actions** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET` → `X-Hub-Signature-256`, shared with GitHub adapter)
+- **GitLab CI** — Static token (`GITLAB_WEBHOOK_SECRET` → `X-Gitlab-Token`, shared with GitLab adapter)
+- **Sentry** — HMAC-SHA256 (`SENTRY_WEBHOOK_SECRET` → `Sentry-Hook-Signature`)
+- **New Relic** — API key header (`NEW_RELIC_API_KEY` → `X-Api-Key`)
+- **Splunk** — HEC token (`SPLUNK_HEC_TOKEN` → `Authorization: Splunk <token>`)
+- **AWS** — SNS topic subscription confirmation; no additional HMAC (SNS signs messages with X.509)
+- **Azure Monitor** — Basic auth with PAT (`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET`)
+- **GCP** — Pub/Sub push token verification (`GCP_PUBSUB_PUSH_TOKEN`)
+- **HashiCorp Vault** — `VAULT_TOKEN` → `X-Vault-Token` header; optional namespace
+- **Wiz / Prisma Cloud** — OAuth2 client credentials (`WIZ_CLIENT_ID`/`WIZ_CLIENT_SECRET`; `PRISMA_ACCESS_KEY`/`PRISMA_SECRET_KEY`)
+- **Checkov / Trivy** — Bridgecrew API token (`BRIDGECREW_API_TOKEN` → `Authorization`)
+- **Azure DevOps Boards** — Basic auth with PAT (`AZDO_TOKEN`, shared with Azure DevOps Repos)
+- **Shortcut** — HMAC-SHA256 (`SHORTCUT_WEBHOOK_SECRET` → `Shortcut-Signature`)
+- **Notion** — Bearer token (`NOTION_TOKEN` → `Authorization`), `Notion-Version: 2022-06-28`
+- **LaunchDarkly** — API key (`LAUNCHDARKLY_API_KEY` → `Authorization`)
+- **Split.io** — Bearer token (`SPLIT_API_KEY` → `Authorization`)
+- **Backstage** — Bearer token (`BACKSTAGE_TOKEN` → `Authorization`)
+- **TestRail** — Basic auth (`TESTRAIL_USER`/`TESTRAIL_API_KEY`)
+- **Xray** — OAuth2 client credentials (`XRAY_CLIENT_ID`/`XRAY_CLIENT_SECRET`)
+- **BrowserStack** — Basic auth (`BROWSERSTACK_USER`/`BROWSERSTACK_ACCESS_KEY`)
+- **Sauce Labs** — Basic auth (`SAUCE_USERNAME`/`SAUCE_ACCESS_KEY`)
+- **Zephyr Scale** — Shared secret header (`ZEPHYR_WEBHOOK_SECRET` → `X-Zephyr-Secret`)
+- **Postman** — API key header (`POSTMAN_API_KEY` → `X-Api-Key`)
+- **Cypress Cloud** — Shared secret header (`CYPRESS_WEBHOOK_SECRET` → `X-Cypress-Secret`)
+- **k6 Cloud** — Bearer token (`K6_CLOUD_API_TOKEN` → `Authorization`)
+- **Applitools** — Shared secret header (`APPLITOOLS_WEBHOOK_SECRET` → `X-Applitools-Signature`)
 
 ### Makefile Commands
 
