@@ -74,7 +74,8 @@ Forge is built around four core principles:
     │                    INTEGRATION LAYER                          │
     │  Jira · GitHub · GitLab · Slack · Teams · Google Chat        │
     │  Confluence · Linear · PagerDuty · Opsgenie                  │
-    │  Datadog · Grafana                                           │
+    │  Datadog · Grafana · Snyk · SonarQube                        │
+    │  Terraform Cloud · Atlantis                                  │
     └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -138,6 +139,10 @@ pip install ruff black mypy
 | Opsgenie | Alert management | `OPSGENIE_API_KEY` |
 | Datadog | Metrics & monitoring | `DATADOG_API_KEY`, `DATADOG_APP_KEY` |
 | Grafana | Dashboards & alerting | `GRAFANA_URL`, `GRAFANA_API_KEY` |
+| Snyk | Vulnerability scanning | `SNYK_API_TOKEN`, `SNYK_ORG_ID`, `SNYK_WEBHOOK_SECRET` |
+| SonarQube | Static code analysis | `SONARQUBE_URL`, `SONARQUBE_TOKEN`, `SONARQUBE_WEBHOOK_SECRET` |
+| Terraform Cloud | IaC plan & apply automation | `TFC_TOKEN`, `TFC_ORGANIZATION`, `TFC_WEBHOOK_HMAC_KEY` |
+| Atlantis | GitOps Terraform automation | `ATLANTIS_URL`, `ATLANTIS_TOKEN`, `ATLANTIS_WEBHOOK_SECRET` |
 | AWS / GCP / Azure | Cloud infrastructure | Provider-specific credentials |
 
 ---
@@ -294,6 +299,18 @@ Product owner drops a PRD in Slack
 | `DATADOG_APP_KEY` | No¹ | — | Datadog application key (required for monitor management) |
 | `GRAFANA_URL` | No¹ | — | Grafana instance base URL (e.g. `https://grafana.acme.com`) |
 | `GRAFANA_API_KEY` | No¹ | — | Grafana service account token or API key |
+| `SNYK_API_TOKEN` | No¹ | — | Snyk personal or service account API token |
+| `SNYK_ORG_ID` | No¹ | — | Snyk organisation ID |
+| `SNYK_WEBHOOK_SECRET` | No¹ | — | Secret used to validate Snyk webhook HMAC-SHA256 signatures |
+| `SONARQUBE_URL` | No¹ | — | SonarQube instance base URL (e.g. `https://sonar.acme.com`) |
+| `SONARQUBE_TOKEN` | No¹ | — | SonarQube user or service account token |
+| `SONARQUBE_WEBHOOK_SECRET` | No¹ | — | Secret used to validate SonarQube webhook HMAC-SHA256 signatures |
+| `TFC_TOKEN` | No¹ | — | Terraform Cloud API token |
+| `TFC_ORGANIZATION` | No¹ | — | Terraform Cloud organisation name |
+| `TFC_WEBHOOK_HMAC_KEY` | No¹ | — | HMAC key for validating Terraform Cloud notification signatures |
+| `ATLANTIS_URL` | No¹ | — | Atlantis server base URL (e.g. `https://atlantis.acme.com`) |
+| `ATLANTIS_TOKEN` | No¹ | — | Atlantis API token (`X-Atlantis-Token`) |
+| `ATLANTIS_WEBHOOK_SECRET` | No¹ | — | Secret used to validate Atlantis webhook HMAC-SHA256 signatures |
 
 > ¹ Required only when the corresponding adapter is enabled for your deployment.
 | `FORGE_LOG_LEVEL` | No | `info` | Log level: `debug`, `info`, `warn`, `error` |
@@ -435,6 +452,10 @@ Each adapter runs as an independent service and communicates with the rest of th
 | **Opsgenie** | `:8099` | `Create` → `escalation.created`; `Close` → `task.completed` | `POST /api/v1/alerts`, `DELETE /api/v1/alerts?id=`, `PATCH /api/v1/alerts?id=` |
 | **Datadog** | `:8100` | `Triggered`/`No Data` → `escalation.created`; `Recovered` → `task.completed` | `POST /api/v1/events` |
 | **Grafana** | `:8101` | `firing` → `escalation.created`; `resolved` → `task.completed` | `POST /api/v1/annotations`, `POST /api/v1/silences` |
+| **Snyk** | `:8102` | `newIssues` (critical/high) → `escalation.created` | `GET /api/v1/vulnerabilities`, `GET /api/v1/projects` |
+| **SonarQube** | `:8103` | `analysis.completed` quality gate `ERROR` → `escalation.created`; `FAILED`/`CANCELLED` → `task.failed` | `GET /api/v1/issues`, `GET /api/v1/qualitygates` |
+| **Terraform Cloud** | `:8104` | `applied` → `task.completed`; `planned_and_finished` → `deployment.approved`; `errored`/`canceled` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/workspaces` |
+| **Atlantis** | `:8105` | `plan success` → `deployment.requested`; `apply success` → `task.completed`; `failure`/`error` → `task.failed` | `POST /api/v1/plan`, `POST /api/v1/apply` |
 
 Webhook security:
 - **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
@@ -446,6 +467,10 @@ Webhook security:
 - **Opsgenie** — Webhook validation via Opsgenie's HMAC-SHA256 signature on the request body
 - **Datadog** — Webhook validation via Datadog's `X-Datadog-Signature` header (configure shared secret in Datadog webhook integration settings)
 - **Grafana** — Webhook validation via Grafana's `X-Grafana-Signature` header (configure shared secret in Grafana contact point settings)
+- **Snyk** — HMAC-SHA256 (`SNYK_WEBHOOK_SECRET` → `X-Snyk-Signature`)
+- **SonarQube** — HMAC-SHA256 (`SONARQUBE_WEBHOOK_SECRET` → `X-Sonar-Webhook-HMAC-SHA256`)
+- **Terraform Cloud** — HMAC-SHA512 (`TFC_WEBHOOK_HMAC_KEY` → `X-TFE-Notification-Signature`)
+- **Atlantis** — HMAC-SHA256 (`ATLANTIS_WEBHOOK_SECRET` → `X-Atlantis-Signature`)
 
 ### Makefile Commands
 
