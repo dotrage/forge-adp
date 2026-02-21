@@ -73,7 +73,7 @@ Forge is built around four core principles:
     ┌──────┴──────────┴──────────┴─────────────────────────────────┐
     │                    INTEGRATION LAYER                          │
     │  Jira · GitHub · GitLab · Slack · Teams · Google Chat        │
-    │  Confluence · Linear                                         │
+    │  Confluence · Linear · PagerDuty · Opsgenie                  │
     └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -133,6 +133,8 @@ pip install ruff black mypy
 | Slack | Team communication | `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` |
 | Microsoft Teams | Team communication | `TEAMS_WEBHOOK_URL`, `TEAMS_HMAC_SECRET` |
 | Google Chat | Team communication | `GOOGLE_CHAT_WEBHOOK_URL`, `GOOGLE_CHAT_VERIFICATION_TOKEN` |
+| PagerDuty | Incident management | `PAGERDUTY_API_KEY`, `PAGERDUTY_SERVICE_ID`, `PAGERDUTY_FROM_EMAIL` |
+| Opsgenie | Alert management | `OPSGENIE_API_KEY` |
 | AWS / GCP / Azure | Cloud infrastructure | Provider-specific credentials |
 
 ---
@@ -281,6 +283,10 @@ Product owner drops a PRD in Slack
 | `TEAMS_HMAC_SECRET` | No¹ | — | HMAC secret for validating Teams bot activity payloads |
 | `GOOGLE_CHAT_WEBHOOK_URL` | No¹ | — | Google Chat space webhook URL |
 | `GOOGLE_CHAT_VERIFICATION_TOKEN` | No¹ | — | Token for verifying inbound Google Chat events |
+| `PAGERDUTY_API_KEY` | No¹ | — | PagerDuty REST API key (v2) |
+| `PAGERDUTY_SERVICE_ID` | No¹ | — | PagerDuty service ID used when creating incidents |
+| `PAGERDUTY_FROM_EMAIL` | No¹ | — | Email address for PagerDuty `From` header (required by some accounts) |
+| `OPSGENIE_API_KEY` | No¹ | — | Opsgenie API key |
 
 > ¹ Required only when the corresponding adapter is enabled for your deployment.
 | `FORGE_LOG_LEVEL` | No | `info` | Log level: `debug`, `info`, `warn`, `error` |
@@ -418,6 +424,8 @@ Each adapter runs as an independent service and communicates with the rest of th
 | **GitLab** | `:8095` | `MergeEvent` → `review.requested`/`task.completed`; `PipelineEvent` → `deployment.approved`/`task.failed` | `POST /api/v1/branches`, `POST /api/v1/mergerequests`, `/api/v1/commits` |
 | **Confluence** | `:8096` | `page_created` → `task.created` (when page carries `forge` label) | `GET/POST/PUT /api/v1/pages`, `GET /api/v1/spaces` |
 | **Linear** | `:8097` | `Issue create` → `task.created`; `Issue update` → `task.completed`; `Issue remove` → `task.failed` | `GET/POST /api/v1/issues`, `POST /api/v1/transitions` |
+| **PagerDuty** | `:8098` | `incident.trigger` → `escalation.created`; `incident.resolve` → `task.completed` | `POST /api/v1/incidents`, `PUT /api/v1/incidents?id=` |
+| **Opsgenie** | `:8099` | `Create` → `escalation.created`; `Close` → `task.completed` | `POST /api/v1/alerts`, `DELETE /api/v1/alerts?id=`, `PATCH /api/v1/alerts?id=` |
 
 Webhook security:
 - **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
@@ -425,6 +433,8 @@ Webhook security:
 - **Linear** — HMAC-SHA256 (`LINEAR_WEBHOOK_SECRET` → `Linear-Signature`)
 - **Teams** — HMAC-SHA256 (`TEAMS_HMAC_SECRET`)
 - **Google Chat** — Verification token (`GOOGLE_CHAT_VERIFICATION_TOKEN`)
+- **PagerDuty** — Webhook signature validation via PagerDuty's `X-PagerDuty-Signature` header (configure in PagerDuty webhook settings)
+- **Opsgenie** — Webhook validation via Opsgenie's HMAC-SHA256 signature on the request body
 
 ### Makefile Commands
 
