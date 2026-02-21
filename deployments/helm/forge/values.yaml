@@ -1,0 +1,66 @@
+global:
+  imageRegistry: your-registry.com
+  imagePullSecrets:
+    - name: registry-credentials
+
+controlPlane:
+  orchestrator:
+    replicas: 3
+    image:
+      repository: forge/orchestrator
+      tag: v0.1.0
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  registry:
+    replicas: 2
+    image:
+      repository: forge/registry
+      tag: v0.1.0
+
+  policyEngine:
+    replicas: 2
+    image:
+      repository: forge/policy-engine
+      tag: v0.1.0
+
+agents:
+  image:
+    repository: forge/agents
+    tag: v0.1.0
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+integrations:
+  jira:
+    enabled: true
+    baseUrl: "https://your-company.atlassian.net"
+  github:
+    enabled: true
+  slack:
+    enabled: true
+
+redis:
+  enabled: true
+  architecture: replication
+  replica:
+    replicaCount: 2
+
+postgresql:
+  enabled: false  # Use external RDS
+
+externalDatabase:
+  host: "forge-db.xxxxx.us-east-1.rds.amazonaws.com"
+  port: 5432
+  database: forge
+  existingSecret: forge-db-credentials

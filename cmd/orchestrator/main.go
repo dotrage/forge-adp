@@ -1,0 +1,64 @@
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/dotrage/forge-adp/internal/orchestrator"
+	"github.com/dotrage/forge-adp/pkg/events"
+)
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	bus, err := events.NewRedisBus(
+		os.Getenv("REDIS_ADDR"),
+		"forge:events",
+	)
+	if err != nil {
+		log.Fatalf("failed to create event bus: %v", err)
+	}
+	defer bus.Close()
+
+	orch, err := orchestrator.New(orchestrator.Config{
+		DatabaseURL: os.Getenv("DATABASE_URL"),
+		EventBus:    bus,
+	})
+	if err != nil {
+		log.Fatalf("failed to create orchestrator: %v", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+	mux.HandleFunc("/api/v1/tasks", orch.HandleTasks)
+	mux.HandleFunc("/api/v1/assign", orch.HandleAssignment)
+
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+
+	go func() {
+		log.Printf("orchestrator listening on :8080")
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("http server error: %v", err)
+		}
+	}()
+
+	go orch.ProcessEvents(ctx)
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	<-sigCh
+
+	log.Println("shutting down orchestrator...")
+	server.Shutdown(ctx)
+}
