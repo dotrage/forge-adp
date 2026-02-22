@@ -1,12 +1,30 @@
-.PHONY: setup build test migrate run-local clean
+.PHONY: setup build build-mcp build-vscode-ext install-vscode-ext test migrate run-local clean
 
 setup:
 	go mod download
 	cd pkg/agents && poetry install
+	cd tools/mcp-server && npm install
+	cd tools/vscode-extension && npm install
 
 build:
 	go build ./...
 	cd pkg/agents && poetry build
+	$(MAKE) build-mcp
+	$(MAKE) build-vscode-ext
+
+build-mcp:
+	@echo "Building Forge MCP server..."
+	cd tools/mcp-server && npm run build
+
+build-vscode-ext:
+	@echo "Building Forge VS Code extension..."
+	cd tools/vscode-extension && npm run build
+
+install-vscode-ext: build-vscode-ext
+	@echo "Packaging and installing VS Code extension..."
+	cd tools/vscode-extension && \
+		npx --yes @vscode/vsce package --no-dependencies && \
+		code --install-extension forge-adp-*.vsix
 
 migrate:
 	@echo "Running DB migrations..."
@@ -43,3 +61,5 @@ clean:
 	go clean ./...
 	find . -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
 	find . -name '*.pyc' -delete 2>/dev/null || true
+	rm -rf tools/mcp-server/dist tools/mcp-server/node_modules
+	rm -rf tools/vscode-extension/dist tools/vscode-extension/node_modules tools/vscode-extension/*.vsix
