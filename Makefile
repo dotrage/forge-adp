@@ -5,6 +5,8 @@
 # Cloud deployment targets
 # Required variables: COMPANY_ID, ENVIRONMENT (default: dev)
 ENVIRONMENT ?= dev
+FORGE_COMPANY_ID ?= local
+FORGE_PROJECT_ID ?= local-project
 
 ## AWS (EKS + RDS)
 deploy-aws:
@@ -90,7 +92,7 @@ migrate:
 
 run-local:
 	docker-compose -f docker-compose.dev.yml up -d
-	go run ./cmd/orchestrator &
+	FORGE_COMPANY_ID=$(FORGE_COMPANY_ID) FORGE_PROJECT_ID=$(FORGE_PROJECT_ID) go run ./cmd/orchestrator &
 	go run ./cmd/registry &
 	go run ./cmd/policy-engine &
 	go run ./cmd/adapters/jira &

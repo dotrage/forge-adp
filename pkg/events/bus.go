@@ -23,6 +23,11 @@ const (
 	DeploymentRequested EventType = "deployment.requested"
 	DeploymentApproved  EventType = "deployment.approved"
 	EscalationCreated   EventType = "escalation.created"
+
+	// Governance events
+	GovernanceAssessmentCompleted EventType = "governance.assessment.completed"
+	GovernanceScheduledTrigger    EventType = "governance.scheduled.trigger"
+	PolicyDenied                  EventType = "policy.denied"
 )
 
 type Event struct {

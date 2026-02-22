@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/dotrage/forge-adp/internal/governance"
 	"github.com/dotrage/forge-adp/internal/orchestrator"
 	"github.com/dotrage/forge-adp/pkg/events"
 )
@@ -25,9 +26,14 @@ func main() {
 	}
 	defer bus.Close()
 
+	projectID := os.Getenv("FORGE_PROJECT_ID")
+	companyID := os.Getenv("FORGE_COMPANY_ID")
+
 	orch, err := orchestrator.New(orchestrator.Config{
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		EventBus:    bus,
+		ProjectID:   projectID,
+		CompanyID:   companyID,
 	})
 	if err != nil {
 		log.Fatalf("failed to create orchestrator: %v", err)
@@ -54,6 +60,26 @@ func main() {
 	}()
 
 	go orch.ProcessEvents(ctx)
+
+	// ----------------------------------------------------------------
+	// Governance scheduler — fires compliance-report (weekly) and
+	// policy-drift-detection (monthly) by creating tasks directly.
+	// ----------------------------------------------------------------
+	scheduler := governance.New(governance.SchedulerConfig{
+		ProjectID: projectID,
+		CompanyID: companyID,
+		Bus:       bus,
+		TaskCreator: func(schedCtx context.Context, st governance.ScheduledTask) error {
+			return orch.CreateTask(schedCtx, orchestrator.Task{
+				ID:        st.ID,
+				AgentRole: st.AgentRole,
+				SkillName: st.SkillName,
+				Input:     st.Input,
+				Priority:  3,
+			})
+		},
+	})
+	go scheduler.Run(ctx)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
