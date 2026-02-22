@@ -1,4 +1,62 @@
-.PHONY: setup build build-mcp build-vscode-ext install-vscode-ext test migrate run-local clean
+.PHONY: setup build build-mcp build-vscode-ext install-vscode-ext test migrate run-local clean \
+        deploy-aws deploy-gcp deploy-azure destroy-aws destroy-gcp destroy-azure \
+        helm-deploy-aws helm-deploy-gcp helm-deploy-azure
+
+# Cloud deployment targets
+# Required variables: COMPANY_ID, ENVIRONMENT (default: dev)
+ENVIRONMENT ?= dev
+
+## AWS (EKS + RDS)
+deploy-aws:
+	@echo "Deploying to AWS (EKS)..."
+	cd deployments/terraform/aws && \
+		terraform init && \
+		terraform apply -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)"
+
+destroy-aws:
+	cd deployments/terraform/aws && \
+		terraform destroy -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)"
+
+helm-deploy-aws:
+	helm upgrade --install forge ./deployments/helm/forge \
+		-f deployments/helm/forge/values.yaml \
+		-f deployments/helm/forge/values.aws.yaml \
+		--namespace forge --create-namespace
+
+## GCP (GKE + Cloud SQL)
+deploy-gcp:
+	@echo "Deploying to GCP (GKE)..."
+	cd deployments/terraform/gcp && \
+		terraform init && \
+		terraform apply -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)" -var="gcp_project=$(GCP_PROJECT)"
+
+destroy-gcp:
+	cd deployments/terraform/gcp && \
+		terraform destroy -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)" -var="gcp_project=$(GCP_PROJECT)"
+
+helm-deploy-gcp:
+	helm upgrade --install forge ./deployments/helm/forge \
+		-f deployments/helm/forge/values.yaml \
+		-f deployments/helm/forge/values.gcp.yaml \
+		--namespace forge --create-namespace
+
+## Azure (AKS + PostgreSQL Flexible Server)
+deploy-azure:
+	@echo "Deploying to Azure (AKS)..."
+	cd deployments/terraform/azure && \
+		terraform init && \
+		terraform apply -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)"
+
+destroy-azure:
+	cd deployments/terraform/azure && \
+		terraform destroy -var="company_id=$(COMPANY_ID)" -var="environment=$(ENVIRONMENT)"
+
+helm-deploy-azure:
+	helm upgrade --install forge ./deployments/helm/forge \
+		-f deployments/helm/forge/values.yaml \
+		-f deployments/helm/forge/values.azure.yaml \
+		--namespace forge --create-namespace
+
 
 setup:
 	go mod download

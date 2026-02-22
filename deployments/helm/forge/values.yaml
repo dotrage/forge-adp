@@ -57,10 +57,10 @@ redis:
     replicaCount: 2
 
 postgresql:
-  enabled: false  # Use external RDS
+  enabled: false  # Use managed cloud database (see values.<cloud>.yaml)
 
 externalDatabase:
-  host: "forge-db.xxxxx.us-east-1.rds.amazonaws.com"
+  host: ""  # Override via values.<cloud>.yaml
   port: 5432
   database: forge
   existingSecret: forge-db-credentials
