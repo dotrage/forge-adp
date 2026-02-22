@@ -1,4 +1,4 @@
-# Forge Protocol
+# Forge Agent Development Protocol
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/dotrage/forge/ci.yml?branch=main&style=flat-square)](https://github.com/dotrage/forge/actions)
 [![Go Version](https://img.shields.io/badge/go-1.22-00ADD8?style=flat-square&logo=go)](https://go.dev/)
@@ -7,7 +7,7 @@
 
 > **An enterprise agent orchestration protocol that transforms product requirements into shipped software.**
 
-Forge connects product owners to a fleet of specialized AI agents — each responsible for a distinct software development function — through a structured workflow of planning, ticketing, execution, review, and deployment. It is designed for private deployment within any company, is not tied to a single product or tech stack, and puts human oversight at the center of every consequential action.
+Forge ADP connects product owners to a fleet of specialized AI agents — each responsible for a distinct software development function — through a structured workflow of planning, ticketing, execution, review, and deployment. It is designed for private deployment within any company, is not tied to a single product or tech stack, and puts human oversight at the center of every consequential action.
 
 ---
 
