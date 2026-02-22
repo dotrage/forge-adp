@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/dotrage/forge-adp/internal/policy"
+	"github.com/dotrage/forge-adp/pkg/config"
 )
 
 func main() {
@@ -30,13 +31,14 @@ func main() {
 	mux.HandleFunc("/api/v1/authorize", engine.HandleAuthorize)
 	mux.HandleFunc("/api/v1/policies", engine.HandlePolicies)
 
+	addr := config.PolicyEnginePort()
 	server := &http.Server{
-		Addr:    ":8082",
+		Addr:    addr,
 		Handler: mux,
 	}
 
 	go func() {
-		log.Printf("policy engine listening on :8082")
+		log.Printf("policy engine listening on %s", addr)
 		server.ListenAndServe()
 	}()
 

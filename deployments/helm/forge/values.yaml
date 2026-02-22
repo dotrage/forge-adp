@@ -6,6 +6,7 @@ global:
 controlPlane:
   orchestrator:
     replicas: 3
+    port: 8080
     image:
       repository: forge/orchestrator
       tag: v0.1.0
@@ -19,12 +20,14 @@ controlPlane:
 
   registry:
     replicas: 2
+    port: 8081
     image:
       repository: forge/registry
       tag: v0.1.0
 
   policyEngine:
     replicas: 2
+    port: 8082
     image:
       repository: forge/policy-engine
       tag: v0.1.0
