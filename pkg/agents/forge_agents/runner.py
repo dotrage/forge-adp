@@ -12,12 +12,14 @@ from .runtime import (
     LLMProvider, PlanReader, MemoryStore
 )
 from .backend_developer import BackendDeveloperAgent
+from .governance import GovernanceAgent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 AGENT_CLASSES: dict[str, Type[BaseAgent]] = {
     "backend-developer": BackendDeveloperAgent,
+    "governance": GovernanceAgent,
     # Add other agents as implemented
 }
 

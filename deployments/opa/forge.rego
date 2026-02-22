@@ -48,6 +48,30 @@ agent_has_permission {
     role == "dba"
 }
 
+# Governance agent permissions
+# The governance agent may read audit data, open policy PRs, and post reports.
+# It may NOT execute deployments, mutations, or any destructive action.
+agent_has_permission {
+    input.action in {
+        "read_audit_log",
+        "read_tasks",
+        "read_policies",
+        "create_ticket",
+        "post_slack_message",
+        "create_pr",
+        "post_review",
+    }
+    role := get_agent_role(input.agent_id)
+    role == "governance"
+}
+
+# Governance agent hard limits — never overridable
+deny {
+    input.action in {"deploy", "apply_migration", "force_push", "delete"}
+    role := get_agent_role(input.agent_id)
+    role == "governance"
+}
+
 # Helper to extract role from agent ID
 get_agent_role(agent_id) = role {
     parts := split(agent_id, ":")
