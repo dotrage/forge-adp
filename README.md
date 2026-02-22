@@ -18,6 +18,10 @@ Forge ADP connects product owners to a fleet of specialized AI agents — each r
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Triggering via Jira](#triggering-agent-work)
+  - [Triggering via Slack](#triggering-via-slack)
+  - [MCP Server (Claude Code)](#using-the-mcp-server-claude-code)
+  - [VS Code Extension](#using-the-vs-code-extension)
 - [Configuration](#configuration)
 - [API & Command Reference](#api--command-reference)
 - [Contributing](#contributing)
@@ -107,6 +111,9 @@ brew install go@1.22
 # Python (Agent Runtimes)
 brew install python@3.12
 pip install poetry
+
+# Node.js (MCP Server + VS Code Extension)
+brew install node@20   # requires Node ≥ 18
 
 # Containers and orchestration
 brew install docker
@@ -280,6 +287,112 @@ Send a message to the Forge bot in your configured Slack channel:
 ```
 
 The Slack Adapter parses the message, creates or links a Jira ticket, and hands off to the Orchestrator.
+
+### Using the MCP Server (Claude Code)
+
+The Forge MCP server exposes the Orchestrator and Registry APIs as tools that any [Model Context Protocol](https://modelcontextprotocol.io) client can call — including **Claude Code**, Claude Desktop, and other MCP-compatible environments.
+
+#### Setup
+
+```bash
+# Install dependencies and build
+make build-mcp
+
+# Or manually:
+cd tools/mcp-server
+npm install
+npm run build
+```
+
+#### Claude Code configuration
+
+Add the following to your Claude Code MCP config (`~/.claude/claude_desktop_config.json` or the workspace `.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "forge": {
+      "command": "node",
+      "args": ["/path/to/forge-adp/tools/mcp-server/dist/index.js"],
+      "env": {
+        "FORGE_ORCHESTRATOR_URL": "http://localhost:8080",
+        "FORGE_REGISTRY_URL": "http://localhost:8081",
+        "FORGE_API_TOKEN": ""
+      }
+    }
+  }
+}
+```
+
+Once configured, Claude Code can call agents directly from chat or agentic workflows:
+
+| Tool | Description |
+|---|---|
+| `forge_submit_task` | Submit a new task to any agent role |
+| `forge_get_task` | Get status and output of a task by ID |
+| `forge_list_tasks` | List tasks with optional role/status filters |
+| `forge_approve_task` | Approve a human-in-the-loop checkpoint |
+| `forge_reject_task` | Reject a checkpoint with a reason |
+| `forge_list_agents` | List all registered agent instances |
+| `forge_list_skills` | List available skills (optionally by role) |
+| `forge_get_skill` | Get the manifest for a specific skill |
+| `forge_list_plans` | List indexed project plan documents |
+| `forge_health` | Check health of all control plane services |
+
+#### Example Claude Code prompt
+
+```
+Use the forge_submit_task tool to ask the backend-developer agent to implement
+the POST /api/v1/auth/refresh endpoint described in ticket AUTH-43.
+```
+
+---
+
+### Using the VS Code Extension
+
+The Forge VS Code extension adds an **Agent Tasks** panel to the activity bar and a set of commands for submitting tasks, checking status, and approving/rejecting checkpoints — without leaving your editor.
+
+#### Installation
+
+```bash
+# Build and install in one step
+make install-vscode-ext
+```
+
+Or build manually and install the generated `.vsix`:
+
+```bash
+cd tools/vscode-extension
+npm install
+npm run build
+npx @vscode/vsce package --no-dependencies
+code --install-extension forge-adp-*.vsix
+```
+
+#### Configuration
+
+| Setting | Default | Description |
+|---|---|---|
+| `forge.orchestratorUrl` | `http://localhost:8080` | Orchestrator base URL |
+| `forge.registryUrl` | `http://localhost:8081` | Registry base URL |
+| `forge.apiToken` | _(empty)_ | Bearer token for auth (optional for local dev) |
+| `forge.pollIntervalSeconds` | `15` | How often to auto-refresh the task list |
+
+#### Commands
+
+| Command | Description |
+|---|---|
+| **Forge: Submit Task** | Multi-step wizard to submit a task to any agent |
+| **Forge: Get Task Status** | Show full task detail in a side panel |
+| **Forge: List Tasks** | Refresh and focus the task tree view |
+| **Forge: Approve Task** | Approve a pending checkpoint (also available inline in the tree) |
+| **Forge: Reject Task** | Reject a pending checkpoint with a reason |
+| **Forge: Refresh Task List** | Manually refresh the task list |
+| **Forge: Check Service Health** | Ping the Orchestrator health endpoint |
+
+The status bar item shows a live count of tasks needing attention (awaiting approval or blocked) and pulses while agents are running.
+
+---
 
 ### Watching Activity
 
@@ -583,14 +696,17 @@ Webhook security:
 ### Makefile Commands
 
 ```bash
-make setup        # Install all dependencies and tools
-make migrate      # Run database migrations
-make build        # Build all Go binaries to bin/
-make run-local    # Start control plane services locally
-make test         # Run all tests (Go + Python)
-make lint         # Run golangci-lint and ruff
-make docker-build # Build Docker images for all services
-make seed         # Seed a local test project
+make setup              # Install all dependencies (Go, Python, Node.js tools)
+make migrate            # Run database migrations
+make build              # Build all Go binaries, Python package, MCP server, and VS Code extension
+make build-mcp          # Build only the MCP server (tools/mcp-server/)
+make build-vscode-ext   # Build only the VS Code extension (tools/vscode-extension/)
+make install-vscode-ext # Build and install the VS Code extension via `code --install-extension`
+make run-local          # Start control plane services locally
+make test               # Run all tests (Go + Python)
+make lint               # Run golangci-lint and ruff
+make docker-build       # Build Docker images for all services
+make seed               # Seed a local test project
 ```
 
 ### CLI Tools
