@@ -10,6 +10,7 @@ import (
 
 	"github.com/dotrage/forge-adp/internal/governance"
 	"github.com/dotrage/forge-adp/internal/orchestrator"
+	"github.com/dotrage/forge-adp/pkg/config"
 	"github.com/dotrage/forge-adp/pkg/events"
 )
 
@@ -47,13 +48,14 @@ func main() {
 	mux.HandleFunc("/api/v1/tasks", orch.HandleTasks)
 	mux.HandleFunc("/api/v1/assign", orch.HandleAssignment)
 
+	addr := config.OrchestratorPort()
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    addr,
 		Handler: mux,
 	}
 
 	go func() {
-		log.Printf("orchestrator listening on :8080")
+		log.Printf("orchestrator listening on %s", addr)
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("http server error: %v", err)
 		}

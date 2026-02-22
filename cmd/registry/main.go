@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/dotrage/forge-adp/internal/registry"
+	"github.com/dotrage/forge-adp/pkg/config"
 )
 
 func main() {
@@ -32,13 +33,14 @@ func main() {
 	mux.HandleFunc("/api/v1/skills", reg.HandleSkills)
 	mux.HandleFunc("/api/v1/llm-providers", reg.HandleLLMProviders)
 
+	addr := config.RegistryPort()
 	server := &http.Server{
-		Addr:    ":8081",
+		Addr:    addr,
 		Handler: mux,
 	}
 
 	go func() {
-		log.Printf("registry listening on :8081")
+		log.Printf("registry listening on %s", addr)
 		server.ListenAndServe()
 	}()
 
