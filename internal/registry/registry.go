@@ -2,10 +2,13 @@ package registry
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	_ "github.com/lib/pq"
+
+	"github.com/dotrage/forge-adp/pkg/llm/catalog"
 )
 
 type Config struct {
@@ -44,5 +47,9 @@ func (r *Registry) HandleSkills(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Registry) HandleLLMProviders(w http.ResponseWriter, req *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	providers := catalog.KnownProviders()
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(providers); err != nil {
+		http.Error(w, fmt.Sprintf("encode response: %v", err), http.StatusInternalServerError)
+	}
 }
