@@ -1,5 +1,7 @@
 package forge.authz
 
+import future.keywords.in
+
 default allow = false
 
 # Protocol-level hard limits - never overridable

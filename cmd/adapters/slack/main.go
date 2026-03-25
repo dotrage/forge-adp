@@ -43,8 +43,8 @@ func main() {
 	mux.HandleFunc("/slack/commands", adapter.HandleSlashCommand)
 	mux.HandleFunc("/slack/interactive", adapter.HandleInteractive)
 
-	log.Printf("Slack adapter listening on :8092")
-	http.ListenAndServe(":8092", mux)
+	log.Printf("Slack adapter listening on :19092")
+	http.ListenAndServe(":19092", mux)
 }
 
 func (a *SlackAdapter) handleSocketMode() {

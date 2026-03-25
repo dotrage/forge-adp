@@ -55,8 +55,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
 mux.HandleFunc("/api/v1/instances", adapter.HandleInstances)
-log.Printf("Cypress Cloud adapter listening on :8134")
-http.ListenAndServe(":8134", mux)
+log.Printf("Cypress Cloud adapter listening on :19134")
+http.ListenAndServe(":19134", mux)
 }
 
 func (a *CypressAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

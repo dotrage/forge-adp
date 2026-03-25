@@ -111,8 +111,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/plan", adapter.HandlePlan)
 mux.HandleFunc("/api/v1/apply", adapter.HandleApply)
-log.Printf("Atlantis adapter listening on :8105")
-http.ListenAndServe(":8105", mux)
+log.Printf("Atlantis adapter listening on :19105")
+http.ListenAndServe(":19105", mux)
 }
 // verifySignature validates the Atlantis webhook HMAC-SHA256 signature.
 

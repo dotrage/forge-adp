@@ -78,8 +78,8 @@ mux.HandleFunc("/webhook/checkov", adapter.HandleCheckovWebhook)
 mux.HandleFunc("/webhook/trivy", adapter.HandleTrivyWebhook)
 mux.HandleFunc("/api/v1/violations", adapter.HandleViolations)
 mux.HandleFunc("/api/v1/suppressed", adapter.HandleSuppressed)
-log.Printf("Checkov / Trivy adapter listening on :8123")
-http.ListenAndServe(":8123", mux)
+log.Printf("Checkov / Trivy adapter listening on :19123")
+http.ListenAndServe(":19123", mux)
 }
 
 func (a *CheckovAdapter) HandleCheckovWebhook(w http.ResponseWriter, r *http.Request) {

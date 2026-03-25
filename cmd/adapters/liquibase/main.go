@@ -265,6 +265,6 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/status", adapter.HandleStatus)
 mux.HandleFunc("/api/v1/update", adapter.HandleUpdate)
-log.Printf("Liquibase adapter listening on :8138")
-http.ListenAndServe(":8138", mux)
+log.Printf("Liquibase adapter listening on :19138")
+http.ListenAndServe(":19138", mux)
 }

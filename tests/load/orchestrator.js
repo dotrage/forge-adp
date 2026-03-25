@@ -19,7 +19,7 @@ export default function () {
   };
 
   const response = http.post(
-    'http://localhost:8080/api/v1/tasks',
+    'http://localhost:19080/api/v1/tasks',
     JSON.stringify(task),
     { headers: { 'Content-Type': 'application/json' } }
   );

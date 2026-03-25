@@ -66,8 +66,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/alerts", adapter.HandleAlerts)
 mux.HandleFunc("/api/v1/clusters", adapter.HandleClusters)
-log.Printf("MongoDB Atlas adapter listening on :8106")
-http.ListenAndServe(":8106", mux)
+log.Printf("MongoDB Atlas adapter listening on :19106")
+http.ListenAndServe(":19106", mux)
 }
 
 func (a *MongoDBAtlasAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

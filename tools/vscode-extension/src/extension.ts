@@ -300,7 +300,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!id) return;
         const base = vscode.workspace
           .getConfiguration("forge")
-          .get<string>("orchestratorUrl", "http://localhost:8080");
+          .get<string>("orchestratorUrl", "http://localhost:19080");
         await vscode.env.openExternal(
           vscode.Uri.parse(`${base}/v1/tasks/${id}`)
         );

@@ -65,8 +65,8 @@ mux.HandleFunc("/webhook/audit", adapter.HandleAuditWebhook)
 mux.HandleFunc("/api/v1/secrets", adapter.HandleSecrets)
 mux.HandleFunc("/api/v1/lease/renew", adapter.HandleLeaseRenew)
 mux.HandleFunc("/api/v1/lease/revoke", adapter.HandleLeaseRevoke)
-log.Printf("HashiCorp Vault adapter listening on :8121")
-http.ListenAndServe(":8121", mux)
+log.Printf("HashiCorp Vault adapter listening on :19121")
+http.ListenAndServe(":19121", mux)
 }
 
 func (a *VaultAdapter) HandleAuditWebhook(w http.ResponseWriter, r *http.Request) {

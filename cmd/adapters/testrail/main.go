@@ -73,8 +73,8 @@ mux.HandleFunc("/webhook/testrail", adapter.HandleTestRailWebhook)
 mux.HandleFunc("/webhook/xray", adapter.HandleXrayWebhook)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
 mux.HandleFunc("/api/v1/results", adapter.HandleResults)
-log.Printf("TestRail / Xray adapter listening on :8130")
-http.ListenAndServe(":8130", mux)
+log.Printf("TestRail / Xray adapter listening on :19130")
+http.ListenAndServe(":19130", mux)
 }
 
 func (a *TestRailAdapter) HandleTestRailWebhook(w http.ResponseWriter, r *http.Request) {

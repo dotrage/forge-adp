@@ -64,8 +64,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/builds", adapter.HandleBuilds)
 mux.HandleFunc("/api/v1/jobs", adapter.HandleJobs)
-log.Printf("Jenkins adapter listening on :8111")
-http.ListenAndServe(":8111", mux)
+log.Printf("Jenkins adapter listening on :19111")
+http.ListenAndServe(":19111", mux)
 }
 
 func (a *JenkinsAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

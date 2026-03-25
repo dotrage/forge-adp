@@ -76,8 +76,8 @@ func main() {
 	mux.HandleFunc("/webhook/pubsub/monitoring", adapter.HandleCloudMonitoring)
 	mux.HandleFunc("/api/v1/builds", adapter.HandleBuilds)
 
-	log.Printf("GCP adapter listening on :8120")
-	http.ListenAndServe(":8120", mux)
+	log.Printf("GCP adapter listening on :19120")
+	http.ListenAndServe(":19120", mux)
 }
 
 func (a *GCPAdapter) HandleCloudBuild(w http.ResponseWriter, r *http.Request) {

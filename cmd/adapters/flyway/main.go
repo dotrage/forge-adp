@@ -247,6 +247,6 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/info", adapter.HandleInfo)
 mux.HandleFunc("/api/v1/migrate", adapter.HandleMigrate)
-log.Printf("Flyway adapter listening on :8137")
-http.ListenAndServe(":8137", mux)
+log.Printf("Flyway adapter listening on :19137")
+http.ListenAndServe(":19137", mux)
 }

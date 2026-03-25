@@ -65,8 +65,8 @@ func main() {
 	mux.HandleFunc("/api/v1/alarms", adapter.HandleAlarms)
 	mux.HandleFunc("/api/v1/stacks", adapter.HandleStacks)
 
-	log.Printf("AWS adapter listening on :8118")
-	http.ListenAndServe(":8118", mux)
+	log.Printf("AWS adapter listening on :19118")
+	http.ListenAndServe(":19118", mux)
 }
 
 func (a *AWSAdapter) HandleSNS(w http.ResponseWriter, r *http.Request) {

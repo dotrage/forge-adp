@@ -58,8 +58,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/alerts", adapter.HandleAlerts)
 mux.HandleFunc("/api/v1/violations", adapter.HandleViolations)
-log.Printf("New Relic adapter listening on :8116")
-http.ListenAndServe(":8116", mux)
+log.Printf("New Relic adapter listening on :19116")
+http.ListenAndServe(":19116", mux)
 }
 
 func (a *NewRelicAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

@@ -56,8 +56,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/splits", adapter.HandleSplits)
 mux.HandleFunc("/api/v1/toggles", adapter.HandleToggles)
-log.Printf("Split.io adapter listening on :8128")
-http.ListenAndServe(":8128", mux)
+log.Printf("Split.io adapter listening on :19128")
+http.ListenAndServe(":19128", mux)
 }
 
 func (a *SplitIOAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

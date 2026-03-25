@@ -17,12 +17,12 @@
       "properties": {
         "forge.orchestratorUrl": {
           "type": "string",
-          "default": "http://localhost:8080",
+          "default": "http://localhost:19080",
           "description": "Base URL of the Forge Orchestrator service."
         },
         "forge.registryUrl": {
           "type": "string",
-          "default": "http://localhost:8081",
+          "default": "http://localhost:19081",
           "description": "Base URL of the Forge Registry service."
         },
         "forge.apiToken": {

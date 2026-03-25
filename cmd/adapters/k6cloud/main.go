@@ -57,8 +57,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
 mux.HandleFunc("/api/v1/thresholds", adapter.HandleThresholds)
-log.Printf("k6 Cloud adapter listening on :8135")
-http.ListenAndServe(":8135", mux)
+log.Printf("k6 Cloud adapter listening on :19135")
+http.ListenAndServe(":19135", mux)
 }
 
 func (a *K6Adapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

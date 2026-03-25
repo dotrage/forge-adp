@@ -134,8 +134,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
 mux.HandleFunc("/api/v1/workspaces", adapter.HandleWorkspaces)
-log.Printf("Terraform Cloud adapter listening on :8104")
-http.ListenAndServe(":8104", mux)
+log.Printf("Terraform Cloud adapter listening on :19104")
+http.ListenAndServe(":19104", mux)
 }
 // verifySignature validates the Terraform Cloud notification HMAC-SHA512 signature.
 

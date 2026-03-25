@@ -78,8 +78,8 @@ func main() {
 	mux.HandleFunc("/api/v1/pulls", adapter.HandlePullRequests)
 	mux.HandleFunc("/api/v1/branches", adapter.HandleBranches)
 
-	log.Printf("Bitbucket adapter listening on :8109")
-	http.ListenAndServe(":8109", mux)
+	log.Printf("Bitbucket adapter listening on :19109")
+	http.ListenAndServe(":19109", mux)
 }
 
 func (a *BitbucketAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

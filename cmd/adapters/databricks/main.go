@@ -62,8 +62,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/jobs", adapter.HandleJobs)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
-log.Printf("Databricks adapter listening on :8107")
-http.ListenAndServe(":8107", mux)
+log.Printf("Databricks adapter listening on :19107")
+http.ListenAndServe(":19107", mux)
 }
 
 func (a *DatabricksAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

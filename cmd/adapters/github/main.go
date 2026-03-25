@@ -39,8 +39,8 @@ func main() {
 	mux.HandleFunc("/api/v1/pulls", adapter.HandlePullRequests)
 	mux.HandleFunc("/api/v1/commits", adapter.HandleCommits)
 
-	log.Printf("GitHub adapter listening on :8091")
-	http.ListenAndServe(":8091", mux)
+	log.Printf("GitHub adapter listening on :19091")
+	http.ListenAndServe(":19091", mux)
 }
 
 func (a *GitHubAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

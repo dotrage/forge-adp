@@ -46,8 +46,8 @@ func main() {
 	})
 	mux.HandleFunc("/webhook", adapter.HandleWebhook)
 	mux.HandleFunc("/api/v1/messages", adapter.HandleMessages)
-	log.Printf("Teams adapter listening on :8093")
-	http.ListenAndServe(":8093", mux)
+	log.Printf("Teams adapter listening on :19093")
+	http.ListenAndServe(":19093", mux)
 }
 
 func (a *TeamsAdapter) verifySignature(r *http.Request, body []byte) bool {

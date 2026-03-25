@@ -94,13 +94,13 @@ run-local:
 	docker-compose -f docker-compose.dev.yml up -d
 	FORGE_COMPANY_ID=$(FORGE_COMPANY_ID) FORGE_PROJECT_ID=$(FORGE_PROJECT_ID) go run ./cmd/orchestrator &
 	go run ./cmd/registry &
-	go run ./cmd/policy-engine &
+	OPA_BUNDLE_PATH=./deployments/opa go run ./cmd/policy-engine &
 	go run ./cmd/adapters/jira &
 	go run ./cmd/adapters/github &
 	go run ./cmd/adapters/slack &
 	go run ./cmd/adapters/gitlab &
-	go run ./cmd/adapters/confluence &
-	go run ./cmd/adapters/linear &
+	@if [ -n "$$CONFLUENCE_BASE_URL" ]; then go run ./cmd/adapters/confluence & else echo "Skipping Confluence adapter (CONFLUENCE_BASE_URL not set)"; fi
+	@if [ -n "$$LINEAR_API_KEY" ]; then go run ./cmd/adapters/linear & else echo "Skipping Linear adapter (LINEAR_API_KEY not set)"; fi
 
 test:
 	go test ./...

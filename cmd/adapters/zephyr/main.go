@@ -58,8 +58,8 @@ mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/cycles", adapter.HandleCycles)
 mux.HandleFunc("/api/v1/executions", adapter.HandleExecutions)
 mux.HandleFunc("/api/v1/cases", adapter.HandleTestCases)
-log.Printf("Zephyr Scale adapter listening on :8132")
-http.ListenAndServe(":8132", mux)
+log.Printf("Zephyr Scale adapter listening on :19132")
+http.ListenAndServe(":19132", mux)
 }
 
 func (a *ZephyrAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

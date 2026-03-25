@@ -6,9 +6,9 @@ import httpx
 import time
 
 
-ORCHESTRATOR_URL = "http://localhost:8080"
-JIRA_ADAPTER_URL = "http://localhost:8090"
-GITHUB_ADAPTER_URL = "http://localhost:8091"
+ORCHESTRATOR_URL = "http://localhost:19080"
+JIRA_ADAPTER_URL = "http://localhost:19090"
+GITHUB_ADAPTER_URL = "http://localhost:19091"
 
 
 @pytest.fixture

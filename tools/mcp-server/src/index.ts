@@ -8,9 +8,9 @@
  * agentic workflow.
  *
  * Configuration (environment variables):
- *   FORGE_ORCHESTRATOR_URL   Base URL of the Orchestrator  (default: http://localhost:8080)
- *   FORGE_REGISTRY_URL       Base URL of the Registry       (default: http://localhost:8081)
- *   FORGE_POLICY_URL         Base URL of the Policy Engine  (default: http://localhost:8082)
+ *   FORGE_ORCHESTRATOR_URL   Base URL of the Orchestrator  (default: http://localhost:19080)
+ *   FORGE_REGISTRY_URL       Base URL of the Registry       (default: http://localhost:19081)
+ *   FORGE_POLICY_URL         Base URL of the Policy Engine  (default: http://localhost:19082)
  *   FORGE_API_TOKEN          Bearer token for API auth       (optional for local dev)
  */
 
@@ -28,9 +28,9 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 const ORCHESTRATOR_URL =
-  process.env.FORGE_ORCHESTRATOR_URL ?? "http://localhost:8080";
+  process.env.FORGE_ORCHESTRATOR_URL ?? "http://localhost:19080";
 const REGISTRY_URL =
-  process.env.FORGE_REGISTRY_URL ?? "http://localhost:8081";
+  process.env.FORGE_REGISTRY_URL ?? "http://localhost:19081";
 const API_TOKEN = process.env.FORGE_API_TOKEN ?? "";
 
 // ---------------------------------------------------------------------------

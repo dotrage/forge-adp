@@ -78,8 +78,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 })
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/alerts", adapter.HandleAlerts)
-log.Printf("Opsgenie adapter listening on :8099")
-http.ListenAndServe(":8099", mux)
+log.Printf("Opsgenie adapter listening on :19099")
+http.ListenAndServe(":19099", mux)
 }
 // HandleWebhook processes inbound Opsgenie webhook events.
 

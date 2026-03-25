@@ -120,8 +120,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/issues", adapter.HandleIssues)
 mux.HandleFunc("/api/v1/qualitygates", adapter.HandleQualityGates)
-log.Printf("SonarQube adapter listening on :8103")
-http.ListenAndServe(":8103", mux)
+log.Printf("SonarQube adapter listening on :19103")
+http.ListenAndServe(":19103", mux)
 }
 // verifySignature validates the SonarQube webhook HMAC-SHA256 payload checksum.
 

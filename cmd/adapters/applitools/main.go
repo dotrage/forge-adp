@@ -57,8 +57,8 @@ mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/batches", adapter.HandleBatches)
 mux.HandleFunc("/api/v1/results", adapter.HandleResults)
 mux.HandleFunc("/api/v1/baselines", adapter.HandleBaselines)
-log.Printf("Applitools adapter listening on :8136")
-http.ListenAndServe(":8136", mux)
+log.Printf("Applitools adapter listening on :19136")
+http.ListenAndServe(":19136", mux)
 }
 
 func (a *ApplitoolsAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

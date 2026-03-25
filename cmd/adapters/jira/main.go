@@ -42,8 +42,8 @@ func main() {
 	mux.HandleFunc("/api/v1/tickets", adapter.HandleTickets)
 	mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)
 
-	log.Printf("Jira adapter listening on :8090")
-	http.ListenAndServe(":8090", mux)
+	log.Printf("Jira adapter listening on :19090")
+	http.ListenAndServe(":19090", mux)
 }
 
 func (a *JiraAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

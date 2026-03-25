@@ -78,8 +78,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 })
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/events", adapter.HandleEvents)
-log.Printf("Datadog adapter listening on :8100")
-http.ListenAndServe(":8100", mux)
+log.Printf("Datadog adapter listening on :19100")
+http.ListenAndServe(":19100", mux)
 }
 // HandleWebhook processes inbound Datadog webhook events.
 

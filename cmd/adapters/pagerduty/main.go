@@ -97,8 +97,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 })
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/incidents", adapter.HandleIncidents)
-log.Printf("PagerDuty adapter listening on :8098")
-http.ListenAndServe(":8098", mux)
+log.Printf("PagerDuty adapter listening on :19098")
+http.ListenAndServe(":19098", mux)
 }
 // HandleWebhook processes inbound PagerDuty webhook events.
 

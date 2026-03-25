@@ -64,8 +64,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/pipelines", adapter.HandlePipelines)
 mux.HandleFunc("/api/v1/workflows", adapter.HandleWorkflows)
-log.Printf("CircleCI adapter listening on :8112")
-http.ListenAndServe(":8112", mux)
+log.Printf("CircleCI adapter listening on :19112")
+http.ListenAndServe(":19112", mux)
 }
 
 func (a *CircleCIAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

@@ -55,8 +55,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/search", adapter.HandleSearch)
 mux.HandleFunc("/api/v1/events", adapter.HandleEvents)
-log.Printf("Splunk adapter listening on :8117")
-http.ListenAndServe(":8117", mux)
+log.Printf("Splunk adapter listening on :19117")
+http.ListenAndServe(":19117", mux)
 }
 
 func (a *SplunkAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

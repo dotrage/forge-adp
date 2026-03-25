@@ -57,8 +57,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook/scaffolder", adapter.HandleScaffolderWebhook)
 mux.HandleFunc("/api/v1/entities", adapter.HandleEntities)
 mux.HandleFunc("/api/v1/components", adapter.HandleComponents)
-log.Printf("Backstage adapter listening on :8129")
-http.ListenAndServe(":8129", mux)
+log.Printf("Backstage adapter listening on :19129")
+http.ListenAndServe(":19129", mux)
 }
 
 func (a *BackstageAdapter) HandleScaffolderWebhook(w http.ResponseWriter, r *http.Request) {

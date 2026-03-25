@@ -57,8 +57,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/flags", adapter.HandleFlags)
 mux.HandleFunc("/api/v1/environments", adapter.HandleEnvironments)
-log.Printf("LaunchDarkly adapter listening on :8127")
-http.ListenAndServe(":8127", mux)
+log.Printf("LaunchDarkly adapter listening on :19127")
+http.ListenAndServe(":19127", mux)
 }
 
 func (a *LaunchDarklyAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

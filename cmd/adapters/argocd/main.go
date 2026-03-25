@@ -69,8 +69,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/apps", adapter.HandleApps)
 mux.HandleFunc("/api/v1/sync", adapter.HandleSync)
-log.Printf("ArgoCD adapter listening on :8113")
-http.ListenAndServe(":8113", mux)
+log.Printf("ArgoCD adapter listening on :19113")
+http.ListenAndServe(":19113", mux)
 }
 
 func (a *ArgoCDAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

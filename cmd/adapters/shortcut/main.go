@@ -67,8 +67,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/stories", adapter.HandleStories)
 mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)
-log.Printf("Shortcut (Clubhouse) adapter listening on :8125")
-http.ListenAndServe(":8125", mux)
+log.Printf("Shortcut (Clubhouse) adapter listening on :19125")
+http.ListenAndServe(":19125", mux)
 }
 
 func (a *ShortcutAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

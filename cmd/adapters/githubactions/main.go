@@ -71,8 +71,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook/github", adapter.HandleGitHubWebhook)
 mux.HandleFunc("/webhook/gitlab", adapter.HandleGitLabWebhook)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
-log.Printf("GitHub Actions / GitLab CI adapter listening on :8114")
-http.ListenAndServe(":8114", mux)
+log.Printf("GitHub Actions / GitLab CI adapter listening on :19114")
+http.ListenAndServe(":19114", mux)
 }
 
 func (a *CICDAdapter) HandleGitHubWebhook(w http.ResponseWriter, r *http.Request) {

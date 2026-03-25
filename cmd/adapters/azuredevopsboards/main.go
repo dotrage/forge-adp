@@ -63,8 +63,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/workitems", adapter.HandleWorkItems)
 mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)
-log.Printf("Azure DevOps Boards adapter listening on :8124")
-http.ListenAndServe(":8124", mux)
+log.Printf("Azure DevOps Boards adapter listening on :19124")
+http.ListenAndServe(":19124", mux)
 }
 
 func (a *AzureDevOpsBoardsAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

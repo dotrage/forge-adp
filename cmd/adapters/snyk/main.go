@@ -99,8 +99,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/vulnerabilities", adapter.HandleVulnerabilities)
 mux.HandleFunc("/api/v1/projects", adapter.HandleProjects)
-log.Printf("Snyk adapter listening on :8102")
-http.ListenAndServe(":8102", mux)
+log.Printf("Snyk adapter listening on :19102")
+http.ListenAndServe(":19102", mux)
 }
 // verifySignature validates the Snyk webhook HMAC-SHA256 signature.
 

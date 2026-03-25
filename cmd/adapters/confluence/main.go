@@ -77,8 +77,8 @@ func main() {
 	mux.HandleFunc("/api/v1/pages", adapter.HandlePages)
 	mux.HandleFunc("/api/v1/spaces", adapter.HandleSpaces)
 
-	log.Printf("Confluence adapter listening on :8096")
-	http.ListenAndServe(":8096", mux)
+	log.Printf("Confluence adapter listening on :19096")
+	http.ListenAndServe(":19096", mux)
 }
 
 func (a *ConfluenceAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

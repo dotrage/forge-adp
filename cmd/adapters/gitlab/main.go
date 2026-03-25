@@ -48,8 +48,8 @@ func main() {
 	mux.HandleFunc("/api/v1/mergerequests", adapter.HandleMergeRequests)
 	mux.HandleFunc("/api/v1/commits", adapter.HandleCommits)
 
-	log.Printf("GitLab adapter listening on :8095")
-	http.ListenAndServe(":8095", mux)
+	log.Printf("GitLab adapter listening on :19095")
+	http.ListenAndServe(":19095", mux)
 }
 
 func (a *GitLabAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

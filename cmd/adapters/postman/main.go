@@ -88,8 +88,8 @@ mux.HandleFunc("/webhook/newman", adapter.HandleNewmanWebhook)
 mux.HandleFunc("/api/v1/collections", adapter.HandleCollections)
 mux.HandleFunc("/api/v1/monitors", adapter.HandleMonitors)
 mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
-log.Printf("Postman / Newman adapter listening on :8133")
-http.ListenAndServe(":8133", mux)
+log.Printf("Postman / Newman adapter listening on :19133")
+http.ListenAndServe(":19133", mux)
 }
 
 func (a *PostmanAdapter) HandleMonitorWebhook(w http.ResponseWriter, r *http.Request) {

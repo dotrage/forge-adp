@@ -71,8 +71,8 @@ mux.HandleFunc("/webhook/monitor", adapter.HandleMonitorWebhook)
 mux.HandleFunc("/webhook/devops", adapter.HandleDevOpsWebhook)
 mux.HandleFunc("/api/v1/alerts", adapter.HandleAlerts)
 mux.HandleFunc("/api/v1/pipelines", adapter.HandlePipelines)
-log.Printf("Azure Monitor / Azure DevOps adapter listening on :8119")
-http.ListenAndServe(":8119", mux)
+log.Printf("Azure Monitor / Azure DevOps adapter listening on :19119")
+http.ListenAndServe(":19119", mux)
 }
 
 func (a *AzureMonitorAdapter) HandleMonitorWebhook(w http.ResponseWriter, r *http.Request) {

@@ -68,8 +68,8 @@ mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/pulls", adapter.HandlePullRequests)
 mux.HandleFunc("/api/v1/branches", adapter.HandleBranches)
 mux.HandleFunc("/api/v1/commits", adapter.HandleCommits)
-log.Printf("Azure DevOps Repos adapter listening on :8110")
-http.ListenAndServe(":8110", mux)
+log.Printf("Azure DevOps Repos adapter listening on :19110")
+http.ListenAndServe(":19110", mux)
 }
 
 func (a *AzureDevOpsReposAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

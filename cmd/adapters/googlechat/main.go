@@ -134,8 +134,8 @@ func main() {
 	})
 	mux.HandleFunc("/googlechat/events", adapter.HandleEvent)
 
-	log.Printf("Google Chat adapter listening on :8094")
-	http.ListenAndServe(":8094", mux)
+	log.Printf("Google Chat adapter listening on :19094")
+	http.ListenAndServe(":19094", mux)
 }
 
 func (a *GoogleChatAdapter) HandleEvent(w http.ResponseWriter, r *http.Request) {

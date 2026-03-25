@@ -10,5 +10,5 @@ RUN CGO_ENABLED=0 go build -o /orchestrator ./cmd/orchestrator
 FROM alpine:3.19
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /orchestrator /orchestrator
-EXPOSE 8080
+EXPOSE 19080
 ENTRYPOINT ["/orchestrator"]

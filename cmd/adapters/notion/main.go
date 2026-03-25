@@ -53,8 +53,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/pages", adapter.HandlePages)
 mux.HandleFunc("/api/v1/databases", adapter.HandleDatabases)
-log.Printf("Notion adapter listening on :8126")
-http.ListenAndServe(":8126", mux)
+log.Printf("Notion adapter listening on :19126")
+http.ListenAndServe(":19126", mux)
 }
 // integration webhook — currently in beta; falls back to polling pattern).
 // HandleWebhook processes Notion webhook events (requires Notion's internal

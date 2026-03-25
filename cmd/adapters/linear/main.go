@@ -73,8 +73,8 @@ func main() {
 	mux.HandleFunc("/api/v1/issues", adapter.HandleIssues)
 	mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)
 
-	log.Printf("Linear adapter listening on :8097")
-	http.ListenAndServe(":8097", mux)
+	log.Printf("Linear adapter listening on :19097")
+	http.ListenAndServe(":19097", mux)
 }
 
 func (a *LinearAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

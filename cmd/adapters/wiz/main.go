@@ -79,8 +79,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook/wiz", adapter.HandleWizWebhook)
 mux.HandleFunc("/webhook/prisma", adapter.HandlePrismaWebhook)
 mux.HandleFunc("/api/v1/findings", adapter.HandleFindings)
-log.Printf("Wiz / Prisma Cloud adapter listening on :8122")
-http.ListenAndServe(":8122", mux)
+log.Printf("Wiz / Prisma Cloud adapter listening on :19122")
+http.ListenAndServe(":19122", mux)
 }
 
 func (a *WizAdapter) HandleWizWebhook(w http.ResponseWriter, r *http.Request) {

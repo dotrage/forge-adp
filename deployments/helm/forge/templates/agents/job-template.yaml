@@ -54,7 +54,7 @@ spec:
                   name: forge-credentials
                   key: ANTHROPIC_API_KEY
             - name: GITHUB_ADAPTER_URL
-              value: "http://github-adapter.forge-integrations:8091"
+              value: "http://github-adapter.forge-integrations:19091"
             - name: EVENT_BUS_URL
               value: "http://orchestrator.forge-control-plane:{{ .Values.controlPlane.orchestrator.port }}"
           resources:

@@ -65,8 +65,8 @@ mux.HandleFunc("/webhook/browserstack", adapter.HandleBrowserStackWebhook)
 mux.HandleFunc("/webhook/saucelabs", adapter.HandleSauceLabsWebhook)
 mux.HandleFunc("/api/v1/builds", adapter.HandleBuilds)
 mux.HandleFunc("/api/v1/sessions", adapter.HandleSessions)
-log.Printf("BrowserStack / Sauce Labs adapter listening on :8131")
-http.ListenAndServe(":8131", mux)
+log.Printf("BrowserStack / Sauce Labs adapter listening on :19131")
+http.ListenAndServe(":19131", mux)
 }
 
 func (a *BrowserStackAdapter) HandleBrowserStackWebhook(w http.ResponseWriter, r *http.Request) {

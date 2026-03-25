@@ -4,9 +4,9 @@ import "os"
 
 // Default ports for each core service.
 const (
-	DefaultOrchestratorPort = "8080"
-	DefaultRegistryPort     = "8081"
-	DefaultPolicyEnginePort = "8082"
+	DefaultOrchestratorPort = "19080"
+	DefaultRegistryPort     = "19081"
+	DefaultPolicyEnginePort = "19082"
 )
 
 // OrchestratorPort returns the listen address for the orchestrator service.

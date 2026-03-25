@@ -67,8 +67,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/issues", adapter.HandleIssues)
 mux.HandleFunc("/api/v1/projects", adapter.HandleProjects)
-log.Printf("Sentry adapter listening on :8115")
-http.ListenAndServe(":8115", mux)
+log.Printf("Sentry adapter listening on :19115")
+http.ListenAndServe(":19115", mux)
 }
 
 func (a *SentryAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

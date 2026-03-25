@@ -66,14 +66,14 @@ export class OrchestratorClient {
   private get orchestratorUrl(): string {
     return vscode.workspace
       .getConfiguration("forge")
-      .get<string>("orchestratorUrl", "http://localhost:8080")
+      .get<string>("orchestratorUrl", "http://localhost:19080")
       .replace(/\/$/, "");
   }
 
   private get registryUrl(): string {
     return vscode.workspace
       .getConfiguration("forge")
-      .get<string>("registryUrl", "http://localhost:8081")
+      .get<string>("registryUrl", "http://localhost:19081")
       .replace(/\/$/, "");
   }
 

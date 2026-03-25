@@ -106,8 +106,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/annotations", adapter.HandleAnnotations)
 mux.HandleFunc("/api/v1/silences", adapter.HandleSilences)
-log.Printf("Grafana adapter listening on :8101")
-http.ListenAndServe(":8101", mux)
+log.Printf("Grafana adapter listening on :19101")
+http.ListenAndServe(":19101", mux)
 }
 // HandleWebhook processes inbound Grafana alertmanager webhook events.
 

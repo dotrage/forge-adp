@@ -62,8 +62,8 @@ mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 mux.HandleFunc("/webhook", adapter.HandleWebhook)
 mux.HandleFunc("/api/v1/deployments", adapter.HandleDeployments)
 mux.HandleFunc("/api/v1/projects", adapter.HandleProjects)
-log.Printf("Vercel adapter listening on :8108")
-http.ListenAndServe(":8108", mux)
+log.Printf("Vercel adapter listening on :19108")
+http.ListenAndServe(":19108", mux)
 }
 
 func (a *VercelAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {

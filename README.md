@@ -235,7 +235,7 @@ This compiles the Orchestrator, Registry, Policy Engine, and all integration ada
 make run-local
 ```
 
-The Orchestrator starts on `:8080`, the Registry on `:8081`, and the Policy Engine on `:8082`.
+The Orchestrator starts on `:19080`, the Registry on `:19081`, and the Policy Engine on `:19082`.
 
 ### 6. (Optional) Seed a Project Repository
 
@@ -315,8 +315,8 @@ Add the following to your Claude Code MCP config (`~/.claude/claude_desktop_conf
       "command": "node",
       "args": ["/path/to/forge-adp/tools/mcp-server/dist/index.js"],
       "env": {
-        "FORGE_ORCHESTRATOR_URL": "http://localhost:8080",
-        "FORGE_REGISTRY_URL": "http://localhost:8081",
+        "FORGE_ORCHESTRATOR_URL": "http://localhost:19080",
+        "FORGE_REGISTRY_URL": "http://localhost:19081",
         "FORGE_API_TOKEN": ""
       }
     }
@@ -373,8 +373,8 @@ code --install-extension forge-adp-*.vsix
 
 | Setting | Default | Description |
 |---|---|---|
-| `forge.orchestratorUrl` | `http://localhost:8080` | Orchestrator base URL |
-| `forge.registryUrl` | `http://localhost:8081` | Registry base URL |
+| `forge.orchestratorUrl` | `http://localhost:19080` | Orchestrator base URL |
+| `forge.registryUrl` | `http://localhost:19081` | Registry base URL |
 | `forge.apiToken` | _(empty)_ | Bearer token for auth (optional for local dev) |
 | `forge.pollIntervalSeconds` | `15` | How often to auto-refresh the task list |
 
@@ -561,7 +561,7 @@ The full plan document structure for a seeded repository:
 
 All services expose a JSON REST API. The Orchestrator is the primary entry point.
 
-#### Orchestrator (`:8080`)
+#### Orchestrator (`:19080`)
 
 | Method | Path | Description |
 |---|---|---|
@@ -572,7 +572,7 @@ All services expose a JSON REST API. The Orchestrator is the primary entry point
 | `POST` | `/v1/tasks/{id}/reject` | Reject a pending checkpoint with a reason |
 | `GET` | `/v1/health` | Health check |
 
-#### Registry (`:8081`)
+#### Registry (`:19081`)
 
 | Method | Path | Description |
 |---|---|---|
@@ -582,7 +582,7 @@ All services expose a JSON REST API. The Orchestrator is the primary entry point
 | `POST` | `/v1/skills` | Register a new skill version |
 | `GET` | `/v1/plans` | List indexed plan documents |
 
-#### Policy Engine (`:8082`)
+#### Policy Engine (`:19082`)
 
 | Method | Path | Description |
 |---|---|---|
@@ -596,53 +596,53 @@ Each adapter runs as an independent service and communicates with the rest of th
 
 | Adapter | Port | Inbound (webhooks) | Outbound (API) |
 |---|---|---|---|
-| **Jira** | `:8090` | `jira:issue_created` → `task.created`; `jira:issue_updated` | `GET/POST /api/v1/tickets`, `POST /api/v1/transitions` |
-| **GitHub** | `:8091` | `PullRequestEvent` → `review.requested`/`task.completed`; `CheckSuiteEvent` | `POST /api/v1/branches`, `POST /api/v1/pulls`, `/api/v1/commits` |
-| **Slack** | `:8092` | Slash commands, interactive payloads | Notifies on `task.completed`, `review.requested`, `escalation.created` |
-| **Teams** | `:8093` | Bot Framework activity endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
-| **Google Chat** | `:8094` | Chat event endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
-| **GitLab** | `:8095` | `MergeEvent` → `review.requested`/`task.completed`; `PipelineEvent` → `deployment.approved`/`task.failed` | `POST /api/v1/branches`, `POST /api/v1/mergerequests`, `/api/v1/commits` |
-| **Confluence** | `:8096` | `page_created` → `task.created` (when page carries `forge` label) | `GET/POST/PUT /api/v1/pages`, `GET /api/v1/spaces` |
-| **Linear** | `:8097` | `Issue create` → `task.created`; `Issue update` → `task.completed`; `Issue remove` → `task.failed` | `GET/POST /api/v1/issues`, `POST /api/v1/transitions` |
-| **PagerDuty** | `:8098` | `incident.trigger` → `escalation.created`; `incident.resolve` → `task.completed` | `POST /api/v1/incidents`, `PUT /api/v1/incidents?id=` |
-| **Opsgenie** | `:8099` | `Create` → `escalation.created`; `Close` → `task.completed` | `POST /api/v1/alerts`, `DELETE /api/v1/alerts?id=`, `PATCH /api/v1/alerts?id=` |
-| **Datadog** | `:8100` | `Triggered`/`No Data` → `escalation.created`; `Recovered` → `task.completed` | `POST /api/v1/events` |
-| **Grafana** | `:8101` | `firing` → `escalation.created`; `resolved` → `task.completed` | `POST /api/v1/annotations`, `POST /api/v1/silences` |
-| **Snyk** | `:8102` | `newIssues` (critical/high) → `escalation.created` | `GET /api/v1/vulnerabilities`, `GET /api/v1/projects` |
-| **SonarQube** | `:8103` | `analysis.completed` quality gate `ERROR` → `escalation.created`; `FAILED`/`CANCELLED` → `task.failed` | `GET /api/v1/issues`, `GET /api/v1/qualitygates` |
-| **Terraform Cloud** | `:8104` | `applied` → `task.completed`; `planned_and_finished` → `deployment.approved`; `errored`/`canceled` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/workspaces` |
-| **Atlantis** | `:8105` | `plan success` → `deployment.requested`; `apply success` → `task.completed`; `failure`/`error` → `task.failed` | `POST /api/v1/plan`, `POST /api/v1/apply` |
-| **MongoDB Atlas** | `:8106` | `ALERT_OPENED` → `escalation.created`; `ALERT_CLOSED` → `task.completed` | `GET /api/v1/alerts`, `GET /api/v1/clusters` |
-| **Databricks** | `:8107` | `TERMINATED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `GET /api/v1/jobs`, `GET /api/v1/runs` |
-| **Vercel** | `:8108` | `deployment.succeeded` → `task.completed`; `deployment.error` → `task.failed`; `deployment.ready` → `deployment.approved` | `GET /api/v1/deployments`, `GET /api/v1/projects` |
-| **Bitbucket** | `:8109` | `pullrequest:created` → `review.requested`; `fulfilled` → `task.completed`; `rejected` → `review.rejected` | `GET /api/v1/pullrequests`, `POST /api/v1/comments` |
-| **Azure DevOps Repos** | `:8110` | `git.pullrequest.created` → `review.requested`; merged → `task.completed` | `GET /api/v1/pullrequests`, `GET /api/v1/repos` |
-| **Jenkins** | `:8111` | `STARTED` → `task.started`; `COMPLETED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `POST /api/v1/jobs/build`, `GET /api/v1/jobs` |
-| **CircleCI** | `:8112` | `workflow-completed/success` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/pipelines`, `GET /api/v1/workflows` |
-| **ArgoCD** | `:8113` | `Succeeded` → `deployment.approved`; `Failed` → `task.failed`; `Running` → `task.started` | `GET /api/v1/applications`, `POST /api/v1/sync` |
-| **GitHub Actions / GitLab CI** | `:8114` | `workflow_run completed` → `task.completed`/`task.failed`; GitLab pipeline success/failure | (webhook only) |
-| **Sentry** | `:8115` | `created` (error/fatal) → `escalation.created`; `resolved` → `task.completed` | `GET /api/v1/issues`, `POST /api/v1/comments` |
-| **New Relic** | `:8116` | `open` (CRITICAL) → `escalation.created`; `closed` → `task.completed` | `GET /api/v1/alerts`, `POST /api/v1/events` |
-| **Splunk** | `:8117` | Alert webhook → `escalation.created`; republishes bus events to Splunk HEC | `POST /api/v1/search`, `GET /api/v1/jobs` |
-| **AWS** | `:8118` | SNS `ALARM` → `escalation.created`; `OK` → `task.completed`; auto-confirms SNS subscriptions | (webhook only) |
-| **Azure Monitor / Azure DevOps** | `:8119` | `Fired` → `escalation.created`; `Resolved` → `task.completed`; ADO `build.complete` → `task.completed`/`task.failed` | `GET /api/v1/alerts`, `GET /api/v1/builds` |
-| **GCP** | `:8120` | Pub/Sub Cloud Build `SUCCESS` → `task.completed`; `FAILURE` → `task.failed`; Cloud Monitoring open → `escalation.created` | (Pub/Sub push only) |
-| **HashiCorp Vault** | `:8121` | Audit log errors → `escalation.created` | `GET /api/v1/secrets`, `POST /api/v1/leases` |
-| **Wiz / Prisma Cloud** | `:8122` | OPEN CRITICAL/HIGH → `escalation.created`; RESOLVED → `task.completed` (both platforms) | `GET /api/v1/issues` |
-| **Checkov / Trivy** | `:8123` | Checkov violations → `escalation.created`/`task.blocked`; Trivy SARIF errors → `escalation.created` | (webhook only) |
-| **Azure DevOps Boards** | `:8124` | `workitem.created` (tagged `forge`) → `task.created`; state `Done` → `task.completed`; `Removed` → `task.failed` | `GET /api/v1/workitems`, `PATCH /api/v1/workitems` |
-| **Shortcut** | `:8125` | `story create` → `task.created`; `completed_at` set → `task.completed` | `GET /api/v1/stories`, `POST /api/v1/stories` |
-| **Notion** | `:8126` | `page_created` → `task.created`; `page_updated` → `task.completed` | `GET/POST /api/v1/pages`, `GET /api/v1/databases` |
-| **LaunchDarkly** | `:8127` | Flag changed → `task.completed` | `GET /api/v1/flags`, `GET /api/v1/environments` |
-| **Split.io** | `:8128` | `SPLIT_KILLED` → `escalation.created`; `SPLIT_UPDATED` → `task.completed` | `GET /api/v1/splits`, `POST /api/v1/toggles` |
-| **Backstage** | `:8129` | Scaffolder `completed` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/entities`, `GET /api/v1/components` |
-| **TestRail / Xray** | `:8130` | Test run completed (failures) → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/runs`, `GET /api/v1/results` |
-| **BrowserStack / Sauce Labs** | `:8131` | Build `done`/`complete` with failures → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/builds`, `GET /api/v1/sessions` |
-| **Zephyr Scale** | `:8132` | `testCycle_updated` DONE/PASSED → `task.completed`; FAILED → `task.blocked`; `testExecution_updated` FAIL → `escalation.created` | `GET/POST /api/v1/cycles`, `GET/POST /api/v1/executions`, `GET /api/v1/cases` |
-| **Postman / Newman** | `:8133` | Monitor `passed` → `task.completed`; `failed` → `escalation.created`; Newman report failures → `task.blocked` | `GET /api/v1/collections`, `GET /api/v1/monitors`, `POST /api/v1/runs` |
-| **Cypress Cloud** | `:8134` | `RUN_COMPLETED` passed → `task.completed`; failed/errored → `task.blocked` | `GET /api/v1/runs`, `GET /api/v1/instances` |
-| **k6 Cloud** | `:8135` | `TEST_FINISHED` passed → `task.completed`; threshold breach → `escalation.created`; `TEST_ABORTED` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/thresholds` |
-| **Applitools** | `:8136` | `batchCompleted` Passed → `task.completed`; Failed → `task.blocked`; Unresolved → `review.requested` | `GET /api/v1/batches`, `GET /api/v1/results`, `GET/DELETE /api/v1/baselines` |
+| **Jira** | `:19090` | `jira:issue_created` → `task.created`; `jira:issue_updated` | `GET/POST /api/v1/tickets`, `POST /api/v1/transitions` |
+| **GitHub** | `:19091` | `PullRequestEvent` → `review.requested`/`task.completed`; `CheckSuiteEvent` | `POST /api/v1/branches`, `POST /api/v1/pulls`, `/api/v1/commits` |
+| **Slack** | `:19092` | Slash commands, interactive payloads | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **Teams** | `:19093` | Bot Framework activity endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **Google Chat** | `:19094` | Chat event endpoint | Notifies on `task.completed`, `review.requested`, `escalation.created` |
+| **GitLab** | `:19095` | `MergeEvent` → `review.requested`/`task.completed`; `PipelineEvent` → `deployment.approved`/`task.failed` | `POST /api/v1/branches`, `POST /api/v1/mergerequests`, `/api/v1/commits` |
+| **Confluence** | `:19096` | `page_created` → `task.created` (when page carries `forge` label) | `GET/POST/PUT /api/v1/pages`, `GET /api/v1/spaces` |
+| **Linear** | `:19097` | `Issue create` → `task.created`; `Issue update` → `task.completed`; `Issue remove` → `task.failed` | `GET/POST /api/v1/issues`, `POST /api/v1/transitions` |
+| **PagerDuty** | `:19098` | `incident.trigger` → `escalation.created`; `incident.resolve` → `task.completed` | `POST /api/v1/incidents`, `PUT /api/v1/incidents?id=` |
+| **Opsgenie** | `:19099` | `Create` → `escalation.created`; `Close` → `task.completed` | `POST /api/v1/alerts`, `DELETE /api/v1/alerts?id=`, `PATCH /api/v1/alerts?id=` |
+| **Datadog** | `:19100` | `Triggered`/`No Data` → `escalation.created`; `Recovered` → `task.completed` | `POST /api/v1/events` |
+| **Grafana** | `:19101` | `firing` → `escalation.created`; `resolved` → `task.completed` | `POST /api/v1/annotations`, `POST /api/v1/silences` |
+| **Snyk** | `:19102` | `newIssues` (critical/high) → `escalation.created` | `GET /api/v1/vulnerabilities`, `GET /api/v1/projects` |
+| **SonarQube** | `:19103` | `analysis.completed` quality gate `ERROR` → `escalation.created`; `FAILED`/`CANCELLED` → `task.failed` | `GET /api/v1/issues`, `GET /api/v1/qualitygates` |
+| **Terraform Cloud** | `:19104` | `applied` → `task.completed`; `planned_and_finished` → `deployment.approved`; `errored`/`canceled` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/workspaces` |
+| **Atlantis** | `:19105` | `plan success` → `deployment.requested`; `apply success` → `task.completed`; `failure`/`error` → `task.failed` | `POST /api/v1/plan`, `POST /api/v1/apply` |
+| **MongoDB Atlas** | `:19106` | `ALERT_OPENED` → `escalation.created`; `ALERT_CLOSED` → `task.completed` | `GET /api/v1/alerts`, `GET /api/v1/clusters` |
+| **Databricks** | `:19107` | `TERMINATED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `GET /api/v1/jobs`, `GET /api/v1/runs` |
+| **Vercel** | `:19108` | `deployment.succeeded` → `task.completed`; `deployment.error` → `task.failed`; `deployment.ready` → `deployment.approved` | `GET /api/v1/deployments`, `GET /api/v1/projects` |
+| **Bitbucket** | `:19109` | `pullrequest:created` → `review.requested`; `fulfilled` → `task.completed`; `rejected` → `review.rejected` | `GET /api/v1/pullrequests`, `POST /api/v1/comments` |
+| **Azure DevOps Repos** | `:19110` | `git.pullrequest.created` → `review.requested`; merged → `task.completed` | `GET /api/v1/pullrequests`, `GET /api/v1/repos` |
+| **Jenkins** | `:19111` | `STARTED` → `task.started`; `COMPLETED/SUCCESS` → `task.completed`; `FAILURE` → `task.failed` | `POST /api/v1/jobs/build`, `GET /api/v1/jobs` |
+| **CircleCI** | `:19112` | `workflow-completed/success` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/pipelines`, `GET /api/v1/workflows` |
+| **ArgoCD** | `:19113` | `Succeeded` → `deployment.approved`; `Failed` → `task.failed`; `Running` → `task.started` | `GET /api/v1/applications`, `POST /api/v1/sync` |
+| **GitHub Actions / GitLab CI** | `:19114` | `workflow_run completed` → `task.completed`/`task.failed`; GitLab pipeline success/failure | (webhook only) |
+| **Sentry** | `:19115` | `created` (error/fatal) → `escalation.created`; `resolved` → `task.completed` | `GET /api/v1/issues`, `POST /api/v1/comments` |
+| **New Relic** | `:19116` | `open` (CRITICAL) → `escalation.created`; `closed` → `task.completed` | `GET /api/v1/alerts`, `POST /api/v1/events` |
+| **Splunk** | `:19117` | Alert webhook → `escalation.created`; republishes bus events to Splunk HEC | `POST /api/v1/search`, `GET /api/v1/jobs` |
+| **AWS** | `:19118` | SNS `ALARM` → `escalation.created`; `OK` → `task.completed`; auto-confirms SNS subscriptions | (webhook only) |
+| **Azure Monitor / Azure DevOps** | `:19119` | `Fired` → `escalation.created`; `Resolved` → `task.completed`; ADO `build.complete` → `task.completed`/`task.failed` | `GET /api/v1/alerts`, `GET /api/v1/builds` |
+| **GCP** | `:19120` | Pub/Sub Cloud Build `SUCCESS` → `task.completed`; `FAILURE` → `task.failed`; Cloud Monitoring open → `escalation.created` | (Pub/Sub push only) |
+| **HashiCorp Vault** | `:19121` | Audit log errors → `escalation.created` | `GET /api/v1/secrets`, `POST /api/v1/leases` |
+| **Wiz / Prisma Cloud** | `:19122` | OPEN CRITICAL/HIGH → `escalation.created`; RESOLVED → `task.completed` (both platforms) | `GET /api/v1/issues` |
+| **Checkov / Trivy** | `:19123` | Checkov violations → `escalation.created`/`task.blocked`; Trivy SARIF errors → `escalation.created` | (webhook only) |
+| **Azure DevOps Boards** | `:19124` | `workitem.created` (tagged `forge`) → `task.created`; state `Done` → `task.completed`; `Removed` → `task.failed` | `GET /api/v1/workitems`, `PATCH /api/v1/workitems` |
+| **Shortcut** | `:19125` | `story create` → `task.created`; `completed_at` set → `task.completed` | `GET /api/v1/stories`, `POST /api/v1/stories` |
+| **Notion** | `:19126` | `page_created` → `task.created`; `page_updated` → `task.completed` | `GET/POST /api/v1/pages`, `GET /api/v1/databases` |
+| **LaunchDarkly** | `:19127` | Flag changed → `task.completed` | `GET /api/v1/flags`, `GET /api/v1/environments` |
+| **Split.io** | `:19128` | `SPLIT_KILLED` → `escalation.created`; `SPLIT_UPDATED` → `task.completed` | `GET /api/v1/splits`, `POST /api/v1/toggles` |
+| **Backstage** | `:19129` | Scaffolder `completed` → `task.completed`; `failed` → `task.failed` | `GET /api/v1/entities`, `GET /api/v1/components` |
+| **TestRail / Xray** | `:19130` | Test run completed (failures) → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/runs`, `GET /api/v1/results` |
+| **BrowserStack / Sauce Labs** | `:19131` | Build `done`/`complete` with failures → `task.blocked`; all pass → `task.completed` (both platforms) | `GET /api/v1/builds`, `GET /api/v1/sessions` |
+| **Zephyr Scale** | `:19132` | `testCycle_updated` DONE/PASSED → `task.completed`; FAILED → `task.blocked`; `testExecution_updated` FAIL → `escalation.created` | `GET/POST /api/v1/cycles`, `GET/POST /api/v1/executions`, `GET /api/v1/cases` |
+| **Postman / Newman** | `:19133` | Monitor `passed` → `task.completed`; `failed` → `escalation.created`; Newman report failures → `task.blocked` | `GET /api/v1/collections`, `GET /api/v1/monitors`, `POST /api/v1/runs` |
+| **Cypress Cloud** | `:19134` | `RUN_COMPLETED` passed → `task.completed`; failed/errored → `task.blocked` | `GET /api/v1/runs`, `GET /api/v1/instances` |
+| **k6 Cloud** | `:19135` | `TEST_FINISHED` passed → `task.completed`; threshold breach → `escalation.created`; `TEST_ABORTED` → `task.failed` | `GET/POST /api/v1/runs`, `GET /api/v1/thresholds` |
+| **Applitools** | `:19136` | `batchCompleted` Passed → `task.completed`; Failed → `task.blocked`; Unresolved → `review.requested` | `GET /api/v1/batches`, `GET /api/v1/results`, `GET/DELETE /api/v1/baselines` |
 
 Webhook security:
 - **GitHub** — HMAC-SHA256 (`GITHUB_WEBHOOK_SECRET`)
