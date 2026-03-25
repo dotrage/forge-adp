@@ -1,320 +1,299 @@
-package sonarqube
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"bytes"
 	"context"
 	"crypto/hmac"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("sonarqube API error %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	}		req.Header.Set("Content-Type", "application/json")	if body != nil {	req.SetBasicAuth(a.token, "")	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)	}		bodyReader = bytes.NewReader(b)		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *SonarQubeAdapter) sonarRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {// sonarRequest is a helper that executes an authenticated SonarQube API call.}	})		return nil		// Future: trigger a SonarQube background task when a PR review is requested.	}, func(e events.Event) error {		events.ReviewRequested,	a.bus.Subscribe(ctx, []events.EventType{	ctx := context.Background()func (a *SonarQubeAdapter) subscribeToEvents() {// subscribeToEvents listens for Forge events that should trigger SonarQube actions.}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	if err := a.sonarRequest(r.Context(), http.MethodGet, "/api/qualitygates/list", nil, &result); err != nil {	var result sonarQualityGatesResponse	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodGet {func (a *SonarQubeAdapter) HandleQualityGates(w http.ResponseWriter, r *http.Request) {// HandleQualityGates lists the configured SonarQube quality gates.}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	); err != nil {		nil, &result,		"/api/issues/search?"+q.Encode(),	if err := a.sonarRequest(r.Context(), http.MethodGet,	var result sonarIssuesResponse	q.Set("resolved", "false")	}		q.Set("statuses", status)	if status := r.URL.Query().Get("statuses"); status != "" {	}		q.Set("severities", sev)	if sev := r.URL.Query().Get("severities"); sev != "" {	}		q.Set("componentKeys", pk)	if pk := r.URL.Query().Get("project_key"); pk != "" {	q := url.Values{}	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodGet {func (a *SonarQubeAdapter) HandleIssues(w http.ResponseWriter, r *http.Request) {// HandleIssues proxies issue searches to SonarQube.}	w.WriteHeader(http.StatusOK)	}		}			log.Printf("failed to publish task failed event: %v", err)		}); err != nil {			Payload: eventPayload,			Type:    events.TaskFailed,		if err := a.bus.Publish(r.Context(), events.Event{		})			"status":      payload.Status,			"task_id":     payload.TaskID,			"project_key": payload.Project.Key,			"project":     payload.Project.Name,			"source":      "sonarqube",		eventPayload, _ := json.Marshal(map[string]interface{}{	case "FAILED", "CANCELLED":		}			}				log.Printf("failed to publish escalation event: %v", err)			}); err != nil {				Payload: eventPayload,				Type:    events.EscalationCreated,			if err := a.bus.Publish(r.Context(), events.Event{			})				"reason":             fmt.Sprintf("SonarQube quality gate '%s' failed for project %s", payload.QualityGate.Name, payload.Project.Name),				"failed_conditions":  failedConditions,				"quality_gate":       payload.QualityGate.Name,				"project_url":        payload.Project.URL,				"project_key":        payload.Project.Key,				"project":            payload.Project.Name,				"source":             "sonarqube",			eventPayload, _ := json.Marshal(map[string]interface{}{			}				}					failedConditions = append(failedConditions, fmt.Sprintf("%s (value: %s, threshold: %s)", c.Metric, c.Value, c.ErrorThreshold))				if c.Status == "ERROR" {			for _, c := range payload.QualityGate.Conditions {			var failedConditions []string			// Analysis succeeded but quality gate failed — surface to the bus as a blocker.		if payload.QualityGate != nil && payload.QualityGate.Status == "ERROR" {	case "SUCCESS":	switch payload.Status {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.Unmarshal(body, &payload); err != nil {	var payload sonarWebhookPayload	}		return		http.Error(w, "invalid signature", http.StatusUnauthorized)	if !a.verifySignature(r, body) {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err != nil {	body, err := io.ReadAll(r.Body)	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *SonarQubeAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {// HandleWebhook processes inbound SonarQube analysis events.}	return hmac.Equal([]byte(sig), []byte(expected))	expected := hex.EncodeToString(mac.Sum(nil))	mac.Write(body)	mac := hmac.New(sha256.New, []byte(a.webhookSecret))	}		return false	if sig == "" {	sig := r.Header.Get("X-Sonar-Webhook-HMAC-SHA256")	}		return true	if a.webhookSecret == "" {func (a *SonarQubeAdapter) verifySignature(r *http.Request, body []byte) bool {// verifySignature validates the SonarQube webhook HMAC-SHA256 payload checksum.}	http.ListenAndServe(":8103", mux)	log.Printf("SonarQube adapter listening on :8103")	mux.HandleFunc("/api/v1/qualitygates", adapter.HandleQualityGates)	mux.HandleFunc("/api/v1/issues", adapter.HandleIssues)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		bus:           bus,		httpClient:    &http.Client{},		webhookSecret: os.Getenv("SONARQUBE_WEBHOOK_SECRET"),		token:         token,		baseURL:       strings.TrimRight(baseURL, "/"),	adapter := &SonarQubeAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("SONARQUBE_TOKEN is required")	if token == "" {	token := os.Getenv("SONARQUBE_TOKEN")	}		log.Fatal("SONARQUBE_URL is required")	if baseURL == "" {	baseURL := os.Getenv("SONARQUBE_URL")func main() {}	QualityGates []sonarQualityGate `json:"qualitygates"`type sonarQualityGatesResponse struct {// sonarQualityGatesResponse wraps the list of quality gates.}	} `json:"conditions"`		Error    string `json:"error"`		Operator string `json:"op"`		Metric   string `json:"metric"`	Conditions []struct {	IsBuiltIn  bool   `json:"isBuiltIn"`	IsDefault  bool   `json:"isDefault"`	Name       string `json:"name"`	ID         string `json:"id"`type sonarQualityGate struct {// sonarQualityGate represents a quality gate definition.}	Issues []sonarIssue `json:"issues"`	Total  int          `json:"total"`type sonarIssuesResponse struct {// sonarIssuesResponse wraps the SonarQube issues search response.}	Type     string `json:"type"`	Status   string `json:"status"`	Message  string `json:"message"`	Severity string `json:"severity"`	Rule     string `json:"rule"`	Key      string `json:"key"`type sonarIssue struct {// sonarIssue represents a SonarQube code issue.}	} `json:"branch,omitempty"`		URL  string `json:"url"`		Type string `json:"type"`		Name string `json:"name"`	Branch *struct {	} `json:"qualityGate,omitempty"`		} `json:"conditions"`			ErrorThreshold string `json:"errorThreshold"`			Status     string `json:"status"`			Value      string `json:"value"`			Operator   string `json:"operator"`			Metric     string `json:"metric"`		Conditions []struct {		Status     string `json:"status"`		Name       string `json:"name"`	QualityGate *struct {	} `json:"project"`		URL  string `json:"url"`		Name string `json:"name"`		Key  string `json:"key"`	Project struct {	} `json:"analysis"`		Date string `json:"date"`		Key  string `json:"key"`	Analysis struct {	Status   string `json:"status"`	TaskID   string `json:"taskId"`type sonarWebhookPayload struct {// sonarWebhookPayload is the envelope SonarQube sends for analysis events.}	bus           events.Bus	httpClient    *http.Client	webhookSecret string	token         string	baseURL       stringtype SonarQubeAdapter struct {// SonarQubeAdapter bridges SonarQube analysis events with the Forge event bus.)	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/url"	"net/http"	"log"	"io"	"fmt"	"encoding/json"	"encoding/hex"	"crypto/sha256"
+)
+
+// SonarQubeAdapter bridges SonarQube analysis events with the Forge event bus.)
+
+type SonarQubeAdapter struct {
+	baseURL       string
+	token         string
+	webhookSecret string
+	httpClient    *http.Client
+	bus           events.Bus
+}
+// sonarWebhookPayload is the envelope SonarQube sends for analysis events.
+
+type sonarWebhookPayload struct {
+	TaskID   string `json:"taskId"`
+	Status   string `json:"status"`
+	Analysis struct {
+		Key  string `json:"key"`
+		Date string `json:"date"`
+	} `json:"analysis"`
+Project struct {
+	Key  string `json:"key"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
+} `json:"project"`
+QualityGate *struct {
+	Name       string `json:"name"`
+	Status     string `json:"status"`
+	Conditions []struct {
+		Metric     string `json:"metric"`
+		Operator   string `json:"operator"`
+		Value      string `json:"value"`
+		Status     string `json:"status"`
+		ErrorThreshold string `json:"errorThreshold"`
+	} `json:"conditions"`
+} `json:"qualityGate,omitempty"`
+Branch *struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	URL  string `json:"url"`
+} `json:"branch,omitempty"`
+}
+// sonarIssue represents a SonarQube code issue.
+
+type sonarIssue struct {
+	Key      string `json:"key"`
+	Rule     string `json:"rule"`
+	Severity string `json:"severity"`
+	Message  string `json:"message"`
+	Status   string `json:"status"`
+	Type     string `json:"type"`
+}
+// sonarIssuesResponse wraps the SonarQube issues search response.
+
+type sonarIssuesResponse struct {
+	Total  int          `json:"total"`
+	Issues []sonarIssue `json:"issues"`
+}
+// sonarQualityGate represents a quality gate definition.
+
+type sonarQualityGate struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	IsDefault  bool   `json:"isDefault"`
+	IsBuiltIn  bool   `json:"isBuiltIn"`
+	Conditions []struct {
+		Metric   string `json:"metric"`
+		Operator string `json:"op"`
+		Error    string `json:"error"`
+	} `json:"conditions"`
+}
+// sonarQualityGatesResponse wraps the list of quality gates.
+
+type sonarQualityGatesResponse struct {
+	QualityGates []sonarQualityGate `json:"qualitygates"`
+}
+
+func main() {
+	baseURL := os.Getenv("SONARQUBE_URL")
+	if baseURL == "" {
+		log.Fatal("SONARQUBE_URL is required")
+	}
+token := os.Getenv("SONARQUBE_TOKEN")
+if token == "" {
+	log.Fatal("SONARQUBE_TOKEN is required")
+}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &SonarQubeAdapter{
+	baseURL:       strings.TrimRight(baseURL, "/"),
+	token:         token,
+	webhookSecret: os.Getenv("SONARQUBE_WEBHOOK_SECRET"),
+	httpClient:    &http.Client{},
+	bus:           bus,
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/issues", adapter.HandleIssues)
+mux.HandleFunc("/api/v1/qualitygates", adapter.HandleQualityGates)
+log.Printf("SonarQube adapter listening on :8103")
+http.ListenAndServe(":8103", mux)
+}
+// verifySignature validates the SonarQube webhook HMAC-SHA256 payload checksum.
+
+func (a *SonarQubeAdapter) verifySignature(r *http.Request, body []byte) bool {
+	if a.webhookSecret == "" {
+		return true
+	}
+sig := r.Header.Get("X-Sonar-Webhook-HMAC-SHA256")
+if sig == "" {
+	return false
+}
+mac := hmac.New(sha256.New, []byte(a.webhookSecret))
+mac.Write(body)
+expected := hex.EncodeToString(mac.Sum(nil))
+return hmac.Equal([]byte(sig), []byte(expected))
+}
+// HandleWebhook processes inbound SonarQube analysis events.
+
+func (a *SonarQubeAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+body, err := io.ReadAll(r.Body)
+if err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+if !a.verifySignature(r, body) {
+	http.Error(w, "invalid signature", http.StatusUnauthorized)
+	return
+}
+
+var payload sonarWebhookPayload
+if err := json.Unmarshal(body, &payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+switch payload.Status {
+	case "SUCCESS":
+	if payload.QualityGate != nil && payload.QualityGate.Status == "ERROR" {
+// Analysis succeeded but quality gate failed — surface to the bus as a blocker.
+
+var failedConditions []string
+for _, c := range payload.QualityGate.Conditions {
+	if c.Status == "ERROR" {
+		failedConditions = append(failedConditions, fmt.Sprintf("%s (value: %s, threshold: %s)", c.Metric, c.Value, c.ErrorThreshold))
+	}
+}
+eventPayload, _ := json.Marshal(map[string]interface{}{
+	"source":             "sonarqube",
+	"project":            payload.Project.Name,
+	"project_key":        payload.Project.Key,
+	"project_url":        payload.Project.URL,
+	"quality_gate":       payload.QualityGate.Name,
+	"failed_conditions":  failedConditions,
+	"reason":             fmt.Sprintf("SonarQube quality gate '%s' failed for project %s", payload.QualityGate.Name, payload.Project.Name),
+})
+if err := a.bus.Publish(r.Context(), events.Event{
+	Type:    events.EscalationCreated,
+	Payload: eventPayload,
+}); err != nil {
+log.Printf("failed to publish escalation event: %v", err)
+}
+}
+case "FAILED", "CANCELLED":
+eventPayload, _ := json.Marshal(map[string]interface{}{
+	"source":      "sonarqube",
+	"project":     payload.Project.Name,
+	"project_key": payload.Project.Key,
+	"task_id":     payload.TaskID,
+	"status":      payload.Status,
+})
+if err := a.bus.Publish(r.Context(), events.Event{
+	Type:    events.TaskFailed,
+	Payload: eventPayload,
+}); err != nil {
+log.Printf("failed to publish task failed event: %v", err)
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+// HandleIssues proxies issue searches to SonarQube.
+
+func (a *SonarQubeAdapter) HandleIssues(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+q := url.Values{}
+if pk := r.URL.Query().Get("project_key"); pk != "" {
+	q.Set("componentKeys", pk)
+}
+if sev := r.URL.Query().Get("severities"); sev != "" {
+	q.Set("severities", sev)
+}
+if status := r.URL.Query().Get("statuses"); status != "" {
+	q.Set("statuses", status)
+}
+q.Set("resolved", "false")
+
+var result sonarIssuesResponse
+if err := a.sonarRequest(r.Context(), http.MethodGet,
+"/api/issues/search?"+q.Encode(),
+nil, &result,
+); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+// HandleQualityGates lists the configured SonarQube quality gates.
+
+func (a *SonarQubeAdapter) HandleQualityGates(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var result sonarQualityGatesResponse
+if err := a.sonarRequest(r.Context(), http.MethodGet, "/api/qualitygates/list", nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+// subscribeToEvents listens for Forge events that should trigger SonarQube actions.
+
+func (a *SonarQubeAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{
+		events.ReviewRequested,
+	}, func(e events.Event) error {
+// Future: trigger a SonarQube background task when a PR review is requested.
+return nil
+})
+}
+// sonarRequest is a helper that executes an authenticated SonarQube API call.
+
+func (a *SonarQubeAdapter) sonarRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = bytes.NewReader(b)
+}
+req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.SetBasicAuth(a.token, "")
+if body != nil {
+	req.Header.Set("Content-Type", "application/json")
+}
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("sonarqube API error %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

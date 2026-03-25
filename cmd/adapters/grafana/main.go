@@ -1,308 +1,303 @@
-package grafana
 package main
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"time"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"bytes"
 	"context"
 	"encoding/json"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil && resp.StatusCode != http.StatusNoContent {	}		return fmt.Errorf("grafana API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Authorization", "Bearer "+a.apiKey)	req.Header.Set("Content-Type", "application/json")	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)	}		bodyReader = bytes.NewReader(b)		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *GrafanaAdapter) grafanaRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {// grafanaRequest is a helper that executes an authenticated Grafana REST API call.}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.grafanaRequest(r.Context(), http.MethodPost, "/api/alertmanager/grafana/api/v2/silences", req, &result); err != nil {		var result grafanaSilenceResponse		}			req.CreatedBy = "forge"		if req.CreatedBy == "" {		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {		var req grafanaSilenceRequest	case http.MethodPost:	switch r.Method {func (a *GrafanaAdapter) HandleSilences(w http.ResponseWriter, r *http.Request) {// HandleSilences exposes a REST endpoint so other services can create Grafana alert silences.}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.grafanaRequest(r.Context(), http.MethodPost, "/api/annotations", req, &result); err != nil {		var result grafanaAnnotationResponse		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {		var req grafanaAnnotationRequest	case http.MethodPost:	switch r.Method {func (a *GrafanaAdapter) HandleAnnotations(w http.ResponseWriter, r *http.Request) {// HandleAnnotations exposes a REST endpoint so other services can post Grafana annotations.}	return a.grafanaRequest(context.Background(), http.MethodPost, "/api/annotations", req, nil)	}		Text: text,		Tags: tags,		Time: time.Now().UnixMilli(),	req := grafanaAnnotationRequest{	}		tags = append(tags, payload.JiraKey)	if payload.JiraKey != "" {	tags := []string{"forge"}	}		text = fmt.Sprintf("Forge: %s — %s", payload.JiraKey, payload.Reason)	if payload.JiraKey != "" {	text := fmt.Sprintf("Forge: task %s failed", payload.TaskID)	}		return nil	if payload.Source == "grafana" {	// Skip events that originated from Grafana to avoid loops.	json.Unmarshal(e.Payload, &payload)	}		Source  string `json:"source"`		Reason  string `json:"reason"`		JiraKey string `json:"jira_key"`		TaskID  string `json:"task_id"`	var payload struct {func (a *GrafanaAdapter) postAnnotation(e events.Event) error {}	})		return nil		}			return a.postAnnotation(e)		case events.TaskFailed:			return a.postAnnotation(e)		case events.EscalationCreated:		switch e.Type {	}, func(e events.Event) error {		events.TaskFailed,		events.EscalationCreated,	a.bus.Subscribe(ctx, []events.EventType{	ctx := context.Background()func (a *GrafanaAdapter) subscribeToEvents() {// subscribeToEvents listens for Forge events and posts Grafana annotations.}	}		log.Printf("failed to publish task completed event: %v", err)	}); err != nil {		Payload: p,		Type:    events.TaskCompleted,	if err := a.bus.Publish(ctx, events.Event{	})		"source":      "grafana",		"title":       title,		"fingerprint": alert.Fingerprint,	p, _ := json.Marshal(map[string]interface{}{	}		title = alert.Labels["alertname"]	if title == "" {	title := alert.Annotations["summary"]func (a *GrafanaAdapter) handleAlertResolved(ctx context.Context, alert grafanaAlert) {}	}		log.Printf("failed to publish escalation event: %v", err)	}); err != nil {		Payload: p,		Type:    events.EscalationCreated,	if err := a.bus.Publish(ctx, events.Event{	})		"source":        "grafana",		"labels":        alert.Labels,		"generator_url": alert.GeneratorURL,		"dashboard_url": alert.DashboardURL,		"description":   alert.Annotations["description"],		"title":         title,		"fingerprint":   alert.Fingerprint,	p, _ := json.Marshal(map[string]interface{}{	}		title = alert.Labels["alertname"]	if title == "" {	title := alert.Annotations["summary"]func (a *GrafanaAdapter) handleAlertFiring(ctx context.Context, alert grafanaAlert, externalURL string) {}	w.WriteHeader(http.StatusOK)	}		}			a.handleAlertResolved(r.Context(), alert)		case "resolved":			a.handleAlertFiring(r.Context(), alert, payload.ExternalURL)		case "firing":		switch alert.Status {	for _, alert := range payload.Alerts {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {	var payload grafanaWebhookPayload	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *GrafanaAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {// HandleWebhook processes inbound Grafana alertmanager webhook events.}	http.ListenAndServe(":8101", mux)	log.Printf("Grafana adapter listening on :8101")	mux.HandleFunc("/api/v1/silences", adapter.HandleSilences)	mux.HandleFunc("/api/v1/annotations", adapter.HandleAnnotations)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		bus:        bus,		httpClient: &http.Client{},		apiKey:     apiKey,		baseURL:    baseURL,	adapter := &GrafanaAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("GRAFANA_API_KEY is required")	if apiKey == "" {	apiKey := os.Getenv("GRAFANA_API_KEY")	}		log.Fatal("GRAFANA_URL is required")	if baseURL == "" {	baseURL := os.Getenv("GRAFANA_URL")func main() {}	SilenceID string `json:"silenceID"`type grafanaSilenceResponse struct {}	IsEqual bool   `json:"isEqual"`	IsRegex bool   `json:"isRegex"`	Value   string `json:"value"`	Name    string `json:"name"`type grafanaMatcher struct {}	Comment   string           `json:"comment"`	CreatedBy string           `json:"createdBy"`	EndsAt    string           `json:"endsAt"`	StartsAt  string           `json:"startsAt"`	Matchers  []grafanaMatcher `json:"matchers"`type grafanaSilenceRequest struct {}	Message string `json:"message"`	ID      int    `json:"id"`type grafanaAnnotationResponse struct {}	Text         string   `json:"text"`	Tags         []string `json:"tags,omitempty"`	TimeEnd      int64    `json:"timeEnd,omitempty"`	Time         int64    `json:"time"`	PanelID      int      `json:"panelId,omitempty"`	DashboardUID string   `json:"dashboardUID,omitempty"`type grafanaAnnotationRequest struct {// Grafana REST API request/response types}	ValueString  string            `json:"valueString"`	PanelURL     string            `json:"panelURL"`	DashboardURL string            `json:"dashboardURL"`	SilenceURL   string            `json:"silenceURL"`	Fingerprint  string            `json:"fingerprint"`	GeneratorURL string            `json:"generatorURL"`	EndsAt       string            `json:"endsAt"`	StartsAt     string            `json:"startsAt"`	Annotations  map[string]string `json:"annotations"`	Labels       map[string]string `json:"labels"`	Status       string            `json:"status"` // "firing" or "resolved"type grafanaAlert struct {}	ExternalURL       string            `json:"externalURL"`	CommonAnnotations map[string]string `json:"commonAnnotations"`	CommonLabels      map[string]string `json:"commonLabels"`	GroupLabels       map[string]string `json:"groupLabels"`	Alerts            []grafanaAlert    `json:"alerts"`	Status            string            `json:"status"` // "firing" or "resolved"	Receiver          string            `json:"receiver"`type grafanaWebhookPayload struct {// Grafana Alertmanager webhook payload structures (unified alerting)}	bus        events.Bus	httpClient *http.Client	apiKey     string	baseURL    stringtype GrafanaAdapter struct {)	"github.com/dotrage/forge-adp/pkg/events"	"time"	"os"	"net/http"	"log"	"io"	"fmt"
+)
+
+type GrafanaAdapter struct {
+	baseURL    string
+	apiKey     string
+	httpClient *http.Client
+	bus        events.Bus
+}
+// Grafana Alertmanager webhook payload structures (unified alerting)
+
+type grafanaWebhookPayload struct {
+	Receiver          string            `json:"receiver"`
+	Status            string            `json:"status"` // "firing" or "resolved"
+	Alerts            []grafanaAlert    `json:"alerts"`
+	GroupLabels       map[string]string `json:"groupLabels"`
+	CommonLabels      map[string]string `json:"commonLabels"`
+	CommonAnnotations map[string]string `json:"commonAnnotations"`
+	ExternalURL       string            `json:"externalURL"`
+}
+
+type grafanaAlert struct {
+	Status       string            `json:"status"` // "firing" or "resolved"
+	Labels       map[string]string `json:"labels"`
+	Annotations  map[string]string `json:"annotations"`
+	StartsAt     string            `json:"startsAt"`
+	EndsAt       string            `json:"endsAt"`
+	GeneratorURL string            `json:"generatorURL"`
+	Fingerprint  string            `json:"fingerprint"`
+	SilenceURL   string            `json:"silenceURL"`
+	DashboardURL string            `json:"dashboardURL"`
+	PanelURL     string            `json:"panelURL"`
+	ValueString  string            `json:"valueString"`
+}
+// Grafana REST API request/response types
+
+type grafanaAnnotationRequest struct {
+	DashboardUID string   `json:"dashboardUID,omitempty"`
+	PanelID      int      `json:"panelId,omitempty"`
+	Time         int64    `json:"time"`
+	TimeEnd      int64    `json:"timeEnd,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	Text         string   `json:"text"`
+}
+
+type grafanaAnnotationResponse struct {
+	ID      int    `json:"id"`
+	Message string `json:"message"`
+}
+
+type grafanaSilenceRequest struct {
+	Matchers  []grafanaMatcher `json:"matchers"`
+	StartsAt  string           `json:"startsAt"`
+	EndsAt    string           `json:"endsAt"`
+	CreatedBy string           `json:"createdBy"`
+	Comment   string           `json:"comment"`
+}
+
+type grafanaMatcher struct {
+	Name    string `json:"name"`
+	Value   string `json:"value"`
+	IsRegex bool   `json:"isRegex"`
+	IsEqual bool   `json:"isEqual"`
+}
+
+type grafanaSilenceResponse struct {
+	SilenceID string `json:"silenceID"`
+}
+
+func main() {
+	baseURL := os.Getenv("GRAFANA_URL")
+	if baseURL == "" {
+		log.Fatal("GRAFANA_URL is required")
+	}
+apiKey := os.Getenv("GRAFANA_API_KEY")
+if apiKey == "" {
+	log.Fatal("GRAFANA_API_KEY is required")
+}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &GrafanaAdapter{
+	baseURL:    baseURL,
+	apiKey:     apiKey,
+	httpClient: &http.Client{},
+	bus:        bus,
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/annotations", adapter.HandleAnnotations)
+mux.HandleFunc("/api/v1/silences", adapter.HandleSilences)
+log.Printf("Grafana adapter listening on :8101")
+http.ListenAndServe(":8101", mux)
+}
+// HandleWebhook processes inbound Grafana alertmanager webhook events.
+
+func (a *GrafanaAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var payload grafanaWebhookPayload
+if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+for _, alert := range payload.Alerts {
+	switch alert.Status {
+		case "firing":
+		a.handleAlertFiring(r.Context(), alert, payload.ExternalURL)
+		case "resolved":
+		a.handleAlertResolved(r.Context(), alert)
+	}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *GrafanaAdapter) handleAlertFiring(ctx context.Context, alert grafanaAlert, externalURL string) {
+	title := alert.Annotations["summary"]
+	if title == "" {
+		title = alert.Labels["alertname"]
+	}
+p, _ := json.Marshal(map[string]interface{}{
+	"fingerprint":   alert.Fingerprint,
+	"title":         title,
+	"description":   alert.Annotations["description"],
+	"dashboard_url": alert.DashboardURL,
+	"generator_url": alert.GeneratorURL,
+	"labels":        alert.Labels,
+	"source":        "grafana",
+})
+if err := a.bus.Publish(ctx, events.Event{
+	Type:    events.EscalationCreated,
+	Payload: p,
+}); err != nil {
+log.Printf("failed to publish escalation event: %v", err)
+}
+}
+
+func (a *GrafanaAdapter) handleAlertResolved(ctx context.Context, alert grafanaAlert) {
+	title := alert.Annotations["summary"]
+	if title == "" {
+		title = alert.Labels["alertname"]
+	}
+p, _ := json.Marshal(map[string]interface{}{
+	"fingerprint": alert.Fingerprint,
+	"title":       title,
+	"source":      "grafana",
+})
+if err := a.bus.Publish(ctx, events.Event{
+	Type:    events.TaskCompleted,
+	Payload: p,
+}); err != nil {
+log.Printf("failed to publish task completed event: %v", err)
+}
+}
+// subscribeToEvents listens for Forge events and posts Grafana annotations.
+
+func (a *GrafanaAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{
+		events.EscalationCreated,
+		events.TaskFailed,
+	}, func(e events.Event) error {
+	switch e.Type {
+		case events.EscalationCreated:
+		return a.postAnnotation(e)
+		case events.TaskFailed:
+		return a.postAnnotation(e)
+	}
+return nil
+})
+}
+
+func (a *GrafanaAdapter) postAnnotation(e events.Event) error {
+
+var payload struct {
+	TaskID  string `json:"task_id"`
+	JiraKey string `json:"jira_key"`
+	Reason  string `json:"reason"`
+	Source  string `json:"source"`
+}
+json.Unmarshal(e.Payload, &payload)
+// Skip events that originated from Grafana to avoid loops.
+if payload.Source == "grafana" {
+	return nil
+}
+text := fmt.Sprintf("Forge: task %s failed", payload.TaskID)
+if payload.JiraKey != "" {
+	text = fmt.Sprintf("Forge: %s — %s", payload.JiraKey, payload.Reason)
+}
+tags := []string{"forge"}
+if payload.JiraKey != "" {
+	tags = append(tags, payload.JiraKey)
+}
+req := grafanaAnnotationRequest{
+	Time: time.Now().UnixMilli(),
+	Tags: tags,
+	Text: text,
+}
+return a.grafanaRequest(context.Background(), http.MethodPost, "/api/annotations", req, nil)
+}
+// HandleAnnotations exposes a REST endpoint so other services can post Grafana annotations.
+
+func (a *GrafanaAdapter) HandleAnnotations(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodPost:
+
+var req grafanaAnnotationRequest
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result grafanaAnnotationResponse
+if err := a.grafanaRequest(r.Context(), http.MethodPost, "/api/annotations", req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+// HandleSilences exposes a REST endpoint so other services can create Grafana alert silences.
+
+func (a *GrafanaAdapter) HandleSilences(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodPost:
+
+var req grafanaSilenceRequest
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+if req.CreatedBy == "" {
+	req.CreatedBy = "forge"
+}
+
+var result grafanaSilenceResponse
+if err := a.grafanaRequest(r.Context(), http.MethodPost, "/api/alertmanager/grafana/api/v2/silences", req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+// grafanaRequest is a helper that executes an authenticated Grafana REST API call.
+
+func (a *GrafanaAdapter) grafanaRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = bytes.NewReader(b)
+}
+req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Content-Type", "application/json")
+req.Header.Set("Authorization", "Bearer "+a.apiKey)
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("grafana API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil && resp.StatusCode != http.StatusNoContent {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

@@ -1,253 +1,237 @@
-package checkov
 package main
 
 import (
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("bridgecrew API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Authorization", a.bridgecrewToken)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, bridgecrewAPIBase+path, bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *CheckovAdapter) bcRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	if err := a.bcRequest(r.Context(), http.MethodGet, "/suppressions", nil, &result); err != nil {	var result interface{}	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodGet {func (a *CheckovAdapter) HandleSuppressed(w http.ResponseWriter, r *http.Request) {}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	if err := a.bcRequest(r.Context(), http.MethodGet, "/violations/resources", nil, &result); err != nil {	var result interface{}	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodGet {func (a *CheckovAdapter) HandleViolations(w http.ResponseWriter, r *http.Request) {}	w.WriteHeader(http.StatusOK)	}		}			log.Printf("failed to publish task completed event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {		})			"status": "clean",			"source": "trivy",		ep, _ := json.Marshal(map[string]interface{}{	} else {		}			log.Printf("failed to publish escalation event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {		})			"source":      "trivy",			"error_count": errorCount,		ep, _ := json.Marshal(map[string]interface{}{	if errorCount > 0 {	}		}			}				errorCount++			if result.Level == "error" {		for _, result := range run.Results {	for _, run := range sarif.Runs {	errorCount := 0	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&sarif); err != nil {	var sarif trivySARIFResult	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *CheckovAdapter) HandleTrivyWebhook(w http.ResponseWriter, r *http.Request) {}	w.WriteHeader(http.StatusOK)	}		}			log.Printf("failed to publish task completed event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {		})			"source": "checkov",			"passed": result.Passed,			"branch": result.Branch,			"repo":   result.RepoID,		ep, _ := json.Marshal(map[string]interface{}{	} else {		}			log.Printf("failed to publish task blocked event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskBlocked, Payload: ep}); err != nil {		})			"source": "checkov",			"failed": result.Failed,			"branch": result.Branch,			"repo":   result.RepoID,		ep, _ := json.Marshal(map[string]interface{}{	} else if result.Failed > 0 {		}			log.Printf("failed to publish escalation event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {		})			"source":        "checkov",			"critical_high": criticalOrHigh,			"failed":        result.Failed,			"branch":        result.Branch,			"repo":          result.RepoID,		ep, _ := json.Marshal(map[string]interface{}{	if criticalOrHigh > 0 {	}		}			criticalOrHigh++		if v.Severity == "CRITICAL" || v.Severity == "HIGH" {	for _, v := range result.Violations {	criticalOrHigh := 0	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&result); err != nil {	var result checkCovScanResult	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *CheckovAdapter) HandleCheckovWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8123", mux)	log.Printf("Checkov / Trivy adapter listening on :8123")	mux.HandleFunc("/api/v1/suppressed", adapter.HandleSuppressed)	mux.HandleFunc("/api/v1/violations", adapter.HandleViolations)	mux.HandleFunc("/webhook/trivy", adapter.HandleTrivyWebhook)	mux.HandleFunc("/webhook/checkov", adapter.HandleCheckovWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	}		httpClient:      &http.Client{},		bus:             bus,		webhookSecret:   os.Getenv("CHECKOV_WEBHOOK_SECRET"),		bridgecrewToken: os.Getenv("BRIDGECREW_API_TOKEN"),	adapter := &CheckovAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")func main() {}	} `json:"runs"`		} `json:"results"`			} `json:"locations"`				} `json:"physicalLocation"`					} `json:"artifactLocation"`						URI string `json:"uri"`					ArtifactLocation struct {				PhysicalLocation struct {			Locations []struct {			} `json:"message"`				Text string `json:"text"`			Message struct {			Level   string `json:"level"`			RuleID  string `json:"ruleId"`		Results []struct {	Runs   []struct {	Schema string `json:"$schema"`type trivySARIFResult struct {}	Violations []checkCovViolation `json:"violations"`	Failed     int                 `json:"failed"`	Passed     int                 `json:"passed"`	Branch     string              `json:"branch"`	RepoID     string              `json:"repo_id"`type checkCovScanResult struct {}	Description string `json:"description"`	LineNumber  int    `json:"line_from"`	FilePath    string `json:"file_path"`	Resource    string `json:"resource"`	Severity    string `json:"severity"`	Title       string `json:"title"`	PolicyID    string `json:"policy_id"`type checkCovViolation struct {}	httpClient      *http.Client	bus             events.Bus	webhookSecret   string	bridgecrewToken stringtype CheckovAdapter struct {const bridgecrewAPIBase = "https://www.bridgecrew.cloud/api/v1"// Trivy results are ingested as SARIF or JSON from CI pipeline artifacts.// Checkov posts results via a webhook or the Bridgecrew platform API.// Checkov / Trivy adapter receives IaC and container security scan results.)	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"
+)
+
+const bridgecrewAPIBase = "https://www.bridgecrew.cloud/api/v1"// Trivy results are ingested as SARIF or JSON from CI pipeline artifacts.// Checkov posts results via a webhook or the Bridgecrew platform API.// Checkov / Trivy adapter receives IaC and container security scan results.)
+
+type CheckovAdapter struct {
+	bridgecrewToken string
+	webhookSecret   string
+	bus             events.Bus
+	httpClient      *http.Client
+}
+
+type checkCovViolation struct {
+	PolicyID    string `json:"policy_id"`
+	Title       string `json:"title"`
+	Severity    string `json:"severity"`
+	Resource    string `json:"resource"`
+	FilePath    string `json:"file_path"`
+	LineNumber  int    `json:"line_from"`
+	Description string `json:"description"`
+}
+
+type checkCovScanResult struct {
+	RepoID     string              `json:"repo_id"`
+	Branch     string              `json:"branch"`
+	Passed     int                 `json:"passed"`
+	Failed     int                 `json:"failed"`
+	Violations []checkCovViolation `json:"violations"`
+}
+
+type trivySARIFResult struct {
+	Schema string `json:"$schema"`
+	Runs   []struct {
+		Results []struct {
+			RuleID  string `json:"ruleId"`
+			Level   string `json:"level"`
+			Message struct {
+				Text string `json:"text"`
+			} `json:"message"`
+		Locations []struct {
+			PhysicalLocation struct {
+				ArtifactLocation struct {
+					URI string `json:"uri"`
+				} `json:"artifactLocation"`
+		} `json:"physicalLocation"`
+} `json:"locations"`
+} `json:"results"`
+} `json:"runs"`
+}
+
+func main() {
+	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+	if err != nil {
+		log.Fatalf("failed to create event bus: %v", err)
+	}
+adapter := &CheckovAdapter{
+	bridgecrewToken: os.Getenv("BRIDGECREW_API_TOKEN"),
+	webhookSecret:   os.Getenv("CHECKOV_WEBHOOK_SECRET"),
+	bus:             bus,
+	httpClient:      &http.Client{},
+}
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook/checkov", adapter.HandleCheckovWebhook)
+mux.HandleFunc("/webhook/trivy", adapter.HandleTrivyWebhook)
+mux.HandleFunc("/api/v1/violations", adapter.HandleViolations)
+mux.HandleFunc("/api/v1/suppressed", adapter.HandleSuppressed)
+log.Printf("Checkov / Trivy adapter listening on :8123")
+http.ListenAndServe(":8123", mux)
+}
+
+func (a *CheckovAdapter) HandleCheckovWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var result checkCovScanResult
+if err := json.NewDecoder(r.Body).Decode(&result); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+criticalOrHigh := 0
+for _, v := range result.Violations {
+	if v.Severity == "CRITICAL" || v.Severity == "HIGH" {
+		criticalOrHigh++
+	}
+}
+if criticalOrHigh > 0 {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"repo":          result.RepoID,
+		"branch":        result.Branch,
+		"failed":        result.Failed,
+		"critical_high": criticalOrHigh,
+		"source":        "checkov",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {
+	log.Printf("failed to publish escalation event: %v", err)
+}
+} else if result.Failed > 0 {
+ep, _ := json.Marshal(map[string]interface{}{
+	"repo":   result.RepoID,
+	"branch": result.Branch,
+	"failed": result.Failed,
+	"source": "checkov",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskBlocked, Payload: ep}); err != nil {
+	log.Printf("failed to publish task blocked event: %v", err)
+}
+} else {
+ep, _ := json.Marshal(map[string]interface{}{
+	"repo":   result.RepoID,
+	"branch": result.Branch,
+	"passed": result.Passed,
+	"source": "checkov",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {
+	log.Printf("failed to publish task completed event: %v", err)
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *CheckovAdapter) HandleTrivyWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var sarif trivySARIFResult
+if err := json.NewDecoder(r.Body).Decode(&sarif); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+errorCount := 0
+for _, run := range sarif.Runs {
+	for _, result := range run.Results {
+		if result.Level == "error" {
+			errorCount++
+		}
+}
+}
+if errorCount > 0 {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"error_count": errorCount,
+		"source":      "trivy",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {
+	log.Printf("failed to publish escalation event: %v", err)
+}
+} else {
+ep, _ := json.Marshal(map[string]interface{}{
+	"source": "trivy",
+	"status": "clean",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {
+	log.Printf("failed to publish task completed event: %v", err)
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *CheckovAdapter) HandleViolations(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var result interface{}
+if err := a.bcRequest(r.Context(), http.MethodGet, "/violations/resources", nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+
+func (a *CheckovAdapter) HandleSuppressed(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var result interface{}
+if err := a.bcRequest(r.Context(), http.MethodGet, "/suppressions", nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+
+func (a *CheckovAdapter) bcRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, bridgecrewAPIBase+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", a.bridgecrewToken)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("bridgecrew API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

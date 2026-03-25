@@ -1,218 +1,208 @@
-package splunk
 package main
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"context"
 	"encoding/json"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("splunk API error %d: %s", resp.StatusCode, string(rb))		rb, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Authorization", "Bearer "+a.token)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, a.baseURL+splunkAPIBase+path+"?output_mode=json", bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *SplunkAdapter) splunkRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	return nil	}		return fmt.Errorf("splunk HEC error %d: %s", resp.StatusCode, string(rb))		rb, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Authorization", "Splunk "+a.token)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, http.MethodPost, a.baseURL+"/services/collector/event", strings.NewReader(string(b)))	}		return fmt.Errorf("marshal payload: %w", err)	if err != nil {	b, err := json.Marshal(payload)func (a *SplunkAdapter) hecRequest(ctx context.Context, payload interface{}) error {}	})		return a.hecRequest(ctx, hecPayload)		}			"sourcetype": "forge:event",			"index":      a.index,			},				"payload": json.RawMessage(e.Payload),				"type":    string(e.Type),			"event": map[string]interface{}{		hecPayload := map[string]interface{}{	}, func(e events.Event) error {		events.EscalationCreated,		events.TaskFailed,		events.TaskCompleted,	a.bus.Subscribe(ctx, []events.EventType{	ctx := context.Background()func (a *SplunkAdapter) subscribeToEvents() {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		w.WriteHeader(http.StatusCreated)		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.hecRequest(r.Context(), hecPayload); err != nil {		}			"index": a.index,			"event": event,		hecPayload := map[string]interface{}{		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {		var event map[string]interface{}	case http.MethodPost:	switch r.Method {func (a *SplunkAdapter) HandleEvents(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.splunkRequest(r.Context(), http.MethodPost, "/search/jobs", req, &result); err != nil {		var result map[string]interface{}		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {		var req map[string]interface{}	case http.MethodPost:	switch r.Method {func (a *SplunkAdapter) HandleSearch(w http.ResponseWriter, r *http.Request) {}	}		log.Printf("failed to publish escalation event: %v", err)	if err := a.bus.Publish(ctx, events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {	})		"source":      "splunk",		"app":         p.App,		"owner":       p.Owner,		"results_url": p.ResultsURL,		"search_name": p.SearchName,	ep, _ := json.Marshal(map[string]interface{}{func (a *SplunkAdapter) handleAlert(ctx context.Context, p splunkAlertPayload) {}	w.WriteHeader(http.StatusOK)	a.handleAlert(r.Context(), payload)	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {	var payload splunkAlertPayload	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *SplunkAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8117", mux)	log.Printf("Splunk adapter listening on :8117")	mux.HandleFunc("/api/v1/events", adapter.HandleEvents)	mux.HandleFunc("/api/v1/search", adapter.HandleSearch)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		httpClient: &http.Client{},		bus:        bus,		index:      os.Getenv("SPLUNK_INDEX"),		token:      token,		baseURL:    strings.TrimRight(baseURL, "/"),	adapter := &SplunkAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("SPLUNK_URL and SPLUNK_HEC_TOKEN are required")	if baseURL == "" || token == "" {	token := os.Getenv("SPLUNK_HEC_TOKEN")	baseURL := os.Getenv("SPLUNK_URL")func main() {}	Result     map[string]interface{} `json:"result"`	App        string `json:"app"`	Owner      string `json:"owner"`	ResultsURL string `json:"results_link"`	SearchName string `json:"search_name"`type splunkAlertPayload struct {}	httpClient *http.Client	bus        events.Bus	index      string	token      string	baseURL    stringtype SplunkAdapter struct {const splunkAPIBase = "/services")	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"	"io"	"fmt"
+)
+
+const splunkAPIBase = "/services"
+
+type SplunkAdapter struct {
+	baseURL    string
+	token      string
+	index      string
+	bus        events.Bus
+	httpClient *http.Client
+}
+
+type splunkAlertPayload struct {
+	SearchName string `json:"search_name"`
+	ResultsURL string `json:"results_link"`
+	Owner      string `json:"owner"`
+	App        string `json:"app"`
+	Result     map[string]interface{} `json:"result"`
+}
+
+func main() {
+	baseURL := os.Getenv("SPLUNK_URL")
+	token := os.Getenv("SPLUNK_HEC_TOKEN")
+	if baseURL == "" || token == "" {
+		log.Fatal("SPLUNK_URL and SPLUNK_HEC_TOKEN are required")
+	}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &SplunkAdapter{
+	baseURL:    strings.TrimRight(baseURL, "/"),
+	token:      token,
+	index:      os.Getenv("SPLUNK_INDEX"),
+	bus:        bus,
+	httpClient: &http.Client{},
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/search", adapter.HandleSearch)
+mux.HandleFunc("/api/v1/events", adapter.HandleEvents)
+log.Printf("Splunk adapter listening on :8117")
+http.ListenAndServe(":8117", mux)
+}
+
+func (a *SplunkAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var payload splunkAlertPayload
+if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+a.handleAlert(r.Context(), payload)
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *SplunkAdapter) handleAlert(ctx context.Context, p splunkAlertPayload) {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"search_name": p.SearchName,
+		"results_url": p.ResultsURL,
+		"owner":       p.Owner,
+		"app":         p.App,
+		"source":      "splunk",
+})
+if err := a.bus.Publish(ctx, events.Event{Type: events.EscalationCreated, Payload: ep}); err != nil {
+	log.Printf("failed to publish escalation event: %v", err)
+}
+}
+
+func (a *SplunkAdapter) HandleSearch(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodPost:
+
+var req map[string]interface{}
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result map[string]interface{}
+if err := a.splunkRequest(r.Context(), http.MethodPost, "/search/jobs", req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *SplunkAdapter) HandleEvents(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodPost:
+
+var event map[string]interface{}
+if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+hecPayload := map[string]interface{}{
+	"event": event,
+	"index": a.index,
+}
+if err := a.hecRequest(r.Context(), hecPayload); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.WriteHeader(http.StatusCreated)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *SplunkAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{
+		events.TaskCompleted,
+		events.TaskFailed,
+		events.EscalationCreated,
+	}, func(e events.Event) error {
+	hecPayload := map[string]interface{}{
+		"event": map[string]interface{}{
+			"type":    string(e.Type),
+			"payload": json.RawMessage(e.Payload),
+		},
+	"index":      a.index,
+	"sourcetype": "forge:event",
+}
+return a.hecRequest(ctx, hecPayload)
+})
+}
+
+func (a *SplunkAdapter) hecRequest(ctx context.Context, payload interface{}) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshal payload: %w", err)
+	}
+req, err := http.NewRequestWithContext(ctx, http.MethodPost, a.baseURL+"/services/collector/event", strings.NewReader(string(b)))
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", "Splunk "+a.token)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	rb, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("splunk HEC error %d: %s", resp.StatusCode, string(rb))
+}
+return nil
+}
+
+func (a *SplunkAdapter) splunkRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, a.baseURL+splunkAPIBase+path+"?output_mode=json", bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", "Bearer "+a.token)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	rb, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("splunk API error %d: %s", resp.StatusCode, string(rb))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

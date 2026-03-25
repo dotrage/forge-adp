@@ -1,353 +1,333 @@
-package terraformcloud
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha512"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"bytes"
 	"context"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("terraform cloud API error %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/vnd.api+json")	req.Header.Set("Authorization", "Bearer "+a.token)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, tfcAPIBase+path, bodyReader)	}		bodyReader = bytes.NewReader(b)		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *TerraformCloudAdapter) tfcRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {// tfcRequest is a helper that executes an authenticated Terraform Cloud API call.}	})		return nil		// Future: extract workspace ID from payload and trigger a TFC run.	}, func(e events.Event) error {		events.DeploymentRequested,	a.bus.Subscribe(ctx, []events.EventType{	ctx := context.Background()func (a *TerraformCloudAdapter) subscribeToEvents() {// subscribeToEvents listens for Forge deployment events and triggers Terraform runs.}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	); err != nil {		nil, &result,		fmt.Sprintf("/organizations/%s/workspaces", a.organization),	if err := a.tfcRequest(r.Context(), http.MethodGet,	var result tfcWorkspacesResponse	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodGet {func (a *TerraformCloudAdapter) HandleWorkspaces(w http.ResponseWriter, r *http.Request) {// HandleWorkspaces lists or fetches Terraform Cloud workspaces.}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.WriteHeader(http.StatusCreated)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.tfcRequest(r.Context(), http.MethodPost, "/runs", req, &result); err != nil {		var result tfcRun		req.Data.Relationships.Workspace.Data.Type = "workspaces"		req.Data.Type = "runs"		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {		var req tfcRunCreateRequest	case http.MethodPost:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.tfcRequest(r.Context(), http.MethodGet, "/runs/"+runID, nil, &result); err != nil {		var result tfcRun		}			return			http.Error(w, "id query parameter is required", http.StatusBadRequest)		if runID == "" {		runID := r.URL.Query().Get("id")	case http.MethodGet:	switch r.Method {func (a *TerraformCloudAdapter) HandleRuns(w http.ResponseWriter, r *http.Request) {// HandleRuns manages Terraform Cloud runs (create or get status).}	w.WriteHeader(http.StatusOK)	}		}			}				log.Printf("failed to publish task failed event: %v", err)			}); err != nil {				Payload: eventPayload,				Type:    events.TaskFailed,			if err := a.bus.Publish(r.Context(), events.Event{			})				"reason":       fmt.Sprintf("Terraform Cloud run %s in workspace %s: %s", payload.RunID, payload.WorkspaceName, n.RunStatus),				"status":       n.RunStatus,				"organization": payload.OrganizationName,				"workspace":    payload.WorkspaceName,				"run_url":      payload.RunURL,				"run_id":       payload.RunID,				"source":       "terraform-cloud",			eventPayload, _ := json.Marshal(map[string]interface{}{		case "errored", "canceled", "force_canceled":			}				log.Printf("failed to publish deployment approved event: %v", err)			}); err != nil {				Payload: eventPayload,				Type:    events.DeploymentApproved,			if err := a.bus.Publish(r.Context(), events.Event{			})				"message":      payload.RunMessage,				"organization": payload.OrganizationName,				"workspace":    payload.WorkspaceName,				"run_url":      payload.RunURL,				"run_id":       payload.RunID,				"source":       "terraform-cloud",			eventPayload, _ := json.Marshal(map[string]interface{}{		case "planned_and_finished":			}				log.Printf("failed to publish task completed event: %v", err)			}); err != nil {				Payload: eventPayload,				Type:    events.TaskCompleted,			if err := a.bus.Publish(r.Context(), events.Event{			})				"applied_by":     n.RunUpdatedBy,				"message":        payload.RunMessage,				"organization":   payload.OrganizationName,				"workspace":      payload.WorkspaceName,				"run_url":        payload.RunURL,				"run_id":         payload.RunID,				"source":         "terraform-cloud",			eventPayload, _ := json.Marshal(map[string]interface{}{		case "applied":		switch n.RunStatus {	for _, n := range payload.Notifications {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.Unmarshal(body, &payload); err != nil {	var payload tfcNotificationPayload	}		return		http.Error(w, "invalid signature", http.StatusUnauthorized)	if !a.verifySignature(r, body) {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err != nil {	body, err := io.ReadAll(r.Body)	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *TerraformCloudAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {// HandleWebhook processes inbound Terraform Cloud notification events.}	return hmac.Equal([]byte(sig), []byte(expected))	expected := hex.EncodeToString(mac.Sum(nil))	mac.Write(body)	mac := hmac.New(sha512.New, []byte(a.hmacKey))	}		return false	if sig == "" {	sig := r.Header.Get("X-TFE-Notification-Signature")	}		return true	if a.hmacKey == "" {func (a *TerraformCloudAdapter) verifySignature(r *http.Request, body []byte) bool {// verifySignature validates the Terraform Cloud notification HMAC-SHA512 signature.}	http.ListenAndServe(":8104", mux)	log.Printf("Terraform Cloud adapter listening on :8104")	mux.HandleFunc("/api/v1/workspaces", adapter.HandleWorkspaces)	mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		bus:          bus,		httpClient:   &http.Client{},		hmacKey:      os.Getenv("TFC_WEBHOOK_HMAC_KEY"),		organization: organization,		token:        token,	adapter := &TerraformCloudAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("TFC_ORGANIZATION is required")	if organization == "" {	organization := os.Getenv("TFC_ORGANIZATION")	}		log.Fatal("TFC_TOKEN is required")	if token == "" {	token := os.Getenv("TFC_TOKEN")func main() {}	Data []tfcWorkspace `json:"data"`type tfcWorkspacesResponse struct {// tfcWorkspacesResponse is the list response from /organizations/{org}/workspaces.}	} `json:"attributes"`		TerraformVersion string `json:"terraform-version"`		WorkingDirectory string `json:"working-directory"`		Locked           bool   `json:"locked"`		AutoApply        bool   `json:"auto-apply"`		Environment      string `json:"environment"`		Name             string `json:"name"`	Attributes struct {	Type string `json:"type"`	ID   string `json:"id"`type tfcWorkspace struct {// tfcWorkspace represents a Terraform Cloud workspace.}	} `json:"data"`		} `json:"relationships"`			} `json:"workspace"`				} `json:"data"`					ID   string `json:"id"`					Type string `json:"type"`				Data struct {			Workspace struct {		Relationships struct {		Type string `json:"type"`		} `json:"attributes"`			Message   string `json:"message"`			IsDestroy bool   `json:"is-destroy"`		Attributes struct {	Data struct {type tfcRunCreateRequest struct {// tfcRunCreateRequest is the payload for creating a new run.}	} `json:"data"`		} `json:"relationships"`			} `json:"workspace"`				} `json:"data"`					ID string `json:"id"`				Data struct {			Workspace struct {		Relationships struct {		} `json:"attributes"`			Source  string `json:"source"`			Message string `json:"message"`			Status  string `json:"status"`		Attributes struct {		Type       string `json:"type"`		ID         string `json:"id"`	Data struct {type tfcRun struct {// tfcRun represents a Terraform Cloud run response object.}	} `json:"notifications"`		RunUpdatedBy string `json:"run_updated_by"`		RunUpdatedAt string `json:"run_updated_at"`		RunStatus string `json:"run_status"`		Trigger  string `json:"trigger"`		Message  string `json:"message"`	Notifications     []struct {	OrganizationName  string `json:"organization_name"`	WorkspaceName     string `json:"workspace_name"`	WorkspaceID       string `json:"workspace_id"`	RunCreatedBy      string `json:"run_created_by"`	RunCreatedAt      string `json:"run_created_at"`	RunMessage        string `json:"run_message"`	RunID             string `json:"run_id"`	RunURL            string `json:"run_url"`	NotificationConfigurationID string `json:"notification_configuration_id"`	PayloadVersion    int    `json:"payload_version"`type tfcNotificationPayload struct {// tfcNotificationPayload is the envelope Terraform Cloud sends for notification events.}	bus          events.Bus	httpClient   *http.Client	hmacKey      string	organization string	token        stringtype TerraformCloudAdapter struct {// TerraformCloudAdapter bridges Terraform Cloud run events with the Forge event bus.const tfcAPIBase = "https://app.terraform.io/api/v2")	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"	"io"	"fmt"	"encoding/json"	"encoding/hex"	"crypto/sha512"	"crypto/hmac"
+)
+
+// TerraformCloudAdapter bridges Terraform Cloud run events with the Forge event bus.
+const tfcAPIBase = "https://app.terraform.io/api/v2"
+
+type TerraformCloudAdapter struct {
+	token        string
+	organization string
+	hmacKey      string
+	httpClient   *http.Client
+	bus          events.Bus
+}
+// tfcNotificationPayload is the envelope Terraform Cloud sends for notification events.
+
+type tfcNotificationPayload struct {
+	PayloadVersion    int    `json:"payload_version"`
+	NotificationConfigurationID string `json:"notification_configuration_id"`
+	RunURL            string `json:"run_url"`
+	RunID             string `json:"run_id"`
+	RunMessage        string `json:"run_message"`
+	RunCreatedAt      string `json:"run_created_at"`
+	RunCreatedBy      string `json:"run_created_by"`
+	WorkspaceID       string `json:"workspace_id"`
+	WorkspaceName     string `json:"workspace_name"`
+	OrganizationName  string `json:"organization_name"`
+	Notifications     []struct {
+		Message  string `json:"message"`
+		Trigger  string `json:"trigger"`
+		RunStatus string `json:"run_status"`
+		RunUpdatedAt string `json:"run_updated_at"`
+		RunUpdatedBy string `json:"run_updated_by"`
+	} `json:"notifications"`
+}
+// tfcRun represents a Terraform Cloud run response object.
+
+type tfcRun struct {
+	Data struct {
+		ID         string `json:"id"`
+		Type       string `json:"type"`
+		Attributes struct {
+			Status  string `json:"status"`
+			Message string `json:"message"`
+			Source  string `json:"source"`
+		} `json:"attributes"`
+	Relationships struct {
+		Workspace struct {
+			Data struct {
+				ID string `json:"id"`
+			} `json:"data"`
+	} `json:"workspace"`
+} `json:"relationships"`
+} `json:"data"`
+}
+// tfcRunCreateRequest is the payload for creating a new run.
+
+type tfcRunCreateRequest struct {
+	Data struct {
+		Attributes struct {
+			IsDestroy bool   `json:"is-destroy"`
+			Message   string `json:"message"`
+		} `json:"attributes"`
+	Type string `json:"type"`
+	Relationships struct {
+		Workspace struct {
+			Data struct {
+				Type string `json:"type"`
+				ID   string `json:"id"`
+			} `json:"data"`
+	} `json:"workspace"`
+} `json:"relationships"`
+} `json:"data"`
+}
+// tfcWorkspace represents a Terraform Cloud workspace.
+
+type tfcWorkspace struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	Attributes struct {
+		Name             string `json:"name"`
+		Environment      string `json:"environment"`
+		AutoApply        bool   `json:"auto-apply"`
+		Locked           bool   `json:"locked"`
+		WorkingDirectory string `json:"working-directory"`
+		TerraformVersion string `json:"terraform-version"`
+	} `json:"attributes"`
+}
+// tfcWorkspacesResponse is the list response from /organizations/{org}/workspaces.
+
+type tfcWorkspacesResponse struct {
+	Data []tfcWorkspace `json:"data"`
+}
+
+func main() {
+	token := os.Getenv("TFC_TOKEN")
+	if token == "" {
+		log.Fatal("TFC_TOKEN is required")
+	}
+organization := os.Getenv("TFC_ORGANIZATION")
+if organization == "" {
+	log.Fatal("TFC_ORGANIZATION is required")
+}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &TerraformCloudAdapter{
+	token:        token,
+	organization: organization,
+	hmacKey:      os.Getenv("TFC_WEBHOOK_HMAC_KEY"),
+	httpClient:   &http.Client{},
+	bus:          bus,
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/runs", adapter.HandleRuns)
+mux.HandleFunc("/api/v1/workspaces", adapter.HandleWorkspaces)
+log.Printf("Terraform Cloud adapter listening on :8104")
+http.ListenAndServe(":8104", mux)
+}
+// verifySignature validates the Terraform Cloud notification HMAC-SHA512 signature.
+
+func (a *TerraformCloudAdapter) verifySignature(r *http.Request, body []byte) bool {
+	if a.hmacKey == "" {
+		return true
+	}
+sig := r.Header.Get("X-TFE-Notification-Signature")
+if sig == "" {
+	return false
+}
+mac := hmac.New(sha512.New, []byte(a.hmacKey))
+mac.Write(body)
+expected := hex.EncodeToString(mac.Sum(nil))
+return hmac.Equal([]byte(sig), []byte(expected))
+}
+// HandleWebhook processes inbound Terraform Cloud notification events.
+
+func (a *TerraformCloudAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+body, err := io.ReadAll(r.Body)
+if err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+if !a.verifySignature(r, body) {
+	http.Error(w, "invalid signature", http.StatusUnauthorized)
+	return
+}
+
+var payload tfcNotificationPayload
+if err := json.Unmarshal(body, &payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+for _, n := range payload.Notifications {
+	switch n.RunStatus {
+		case "applied":
+		eventPayload, _ := json.Marshal(map[string]interface{}{
+			"source":         "terraform-cloud",
+			"run_id":         payload.RunID,
+			"run_url":        payload.RunURL,
+			"workspace":      payload.WorkspaceName,
+			"organization":   payload.OrganizationName,
+			"message":        payload.RunMessage,
+			"applied_by":     n.RunUpdatedBy,
+	})
+if err := a.bus.Publish(r.Context(), events.Event{
+	Type:    events.TaskCompleted,
+	Payload: eventPayload,
+}); err != nil {
+log.Printf("failed to publish task completed event: %v", err)
+}
+case "planned_and_finished":
+eventPayload, _ := json.Marshal(map[string]interface{}{
+	"source":       "terraform-cloud",
+	"run_id":       payload.RunID,
+	"run_url":      payload.RunURL,
+	"workspace":    payload.WorkspaceName,
+	"organization": payload.OrganizationName,
+	"message":      payload.RunMessage,
+})
+if err := a.bus.Publish(r.Context(), events.Event{
+	Type:    events.DeploymentApproved,
+	Payload: eventPayload,
+}); err != nil {
+log.Printf("failed to publish deployment approved event: %v", err)
+}
+case "errored", "canceled", "force_canceled":
+eventPayload, _ := json.Marshal(map[string]interface{}{
+	"source":       "terraform-cloud",
+	"run_id":       payload.RunID,
+	"run_url":      payload.RunURL,
+	"workspace":    payload.WorkspaceName,
+	"organization": payload.OrganizationName,
+	"status":       n.RunStatus,
+	"reason":       fmt.Sprintf("Terraform Cloud run %s in workspace %s: %s", payload.RunID, payload.WorkspaceName, n.RunStatus),
+})
+if err := a.bus.Publish(r.Context(), events.Event{
+	Type:    events.TaskFailed,
+	Payload: eventPayload,
+}); err != nil {
+log.Printf("failed to publish task failed event: %v", err)
+}
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+// HandleRuns manages Terraform Cloud runs (create or get status).
+
+func (a *TerraformCloudAdapter) HandleRuns(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		runID := r.URL.Query().Get("id")
+		if runID == "" {
+			http.Error(w, "id query parameter is required", http.StatusBadRequest)
+			return
+		}
+
+var result tfcRun
+if err := a.tfcRequest(r.Context(), http.MethodGet, "/runs/"+runID, nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+case http.MethodPost:
+
+var req tfcRunCreateRequest
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+req.Data.Type = "runs"
+req.Data.Relationships.Workspace.Data.Type = "workspaces"
+
+var result tfcRun
+if err := a.tfcRequest(r.Context(), http.MethodPost, "/runs", req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+w.WriteHeader(http.StatusCreated)
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+// HandleWorkspaces lists or fetches Terraform Cloud workspaces.
+
+func (a *TerraformCloudAdapter) HandleWorkspaces(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var result tfcWorkspacesResponse
+if err := a.tfcRequest(r.Context(), http.MethodGet,
+fmt.Sprintf("/organizations/%s/workspaces", a.organization),
+nil, &result,
+); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+// subscribeToEvents listens for Forge deployment events and triggers Terraform runs.
+
+func (a *TerraformCloudAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{
+		events.DeploymentRequested,
+	}, func(e events.Event) error {
+// Future: extract workspace ID from payload and trigger a TFC run.
+return nil
+})
+}
+// tfcRequest is a helper that executes an authenticated Terraform Cloud API call.
+
+func (a *TerraformCloudAdapter) tfcRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = bytes.NewReader(b)
+}
+req, err := http.NewRequestWithContext(ctx, method, tfcAPIBase+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", "Bearer "+a.token)
+req.Header.Set("Content-Type", "application/vnd.api+json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("terraform cloud API error %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

@@ -1,218 +1,208 @@
-package argocd
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("argocd API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Authorization", "Bearer "+a.token)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, a.baseURL+argoCDAPIBase+path, bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *ArgoCDAdapter) argoRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	})		return nil	a.bus.Subscribe(ctx, []events.EventType{events.DeploymentRequested}, func(e events.Event) error {	ctx := context.Background()func (a *ArgoCDAdapter) subscribeToEvents() {}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	if err := a.argoRequest(r.Context(), http.MethodPost, fmt.Sprintf("/applications/%s/sync", appName), map[string]interface{}{}, &result); err != nil {	var result map[string]interface{}	}		return		http.Error(w, "app query parameter is required", http.StatusBadRequest)	if appName == "" {	appName := r.URL.Query().Get("app")	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *ArgoCDAdapter) HandleSync(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.argoRequest(r.Context(), http.MethodGet, "/applications", nil, &result); err != nil {		var result map[string]interface{}	case http.MethodGet:	switch r.Method {func (a *ArgoCDAdapter) HandleApps(w http.ResponseWriter, r *http.Request) {}	}		log.Printf("failed to publish task started event: %v", err)	if err := a.bus.Publish(ctx, events.Event{Type: events.TaskStarted, Payload: ep}); err != nil {	})		"source":   "argocd",		"app_name": app.Metadata.Name,	ep, _ := json.Marshal(map[string]interface{}{func (a *ArgoCDAdapter) handleSyncRunning(ctx context.Context, app argoCDApp) {}	}		log.Printf("failed to publish task failed event: %v", err)	if err := a.bus.Publish(ctx, events.Event{Type: events.TaskFailed, Payload: ep}); err != nil {	})		"source":   "argocd",		"message":  app.Status.OperationState.Message,		"app_name": app.Metadata.Name,	ep, _ := json.Marshal(map[string]interface{}{func (a *ArgoCDAdapter) handleSyncFailed(ctx context.Context, app argoCDApp) {}	}		log.Printf("failed to publish deployment approved event: %v", err)	if err := a.bus.Publish(ctx, events.Event{Type: events.DeploymentApproved, Payload: ep}); err != nil {	})		"source":      "argocd",		"health":      app.Status.Health.Status,		"sync_status": app.Status.Sync.Status,		"app_name":    app.Metadata.Name,	ep, _ := json.Marshal(map[string]interface{}{func (a *ArgoCDAdapter) handleSyncSucceeded(ctx context.Context, app argoCDApp) {}	w.WriteHeader(http.StatusOK)	}		}			a.handleSyncRunning(r.Context(), app)		case "Running":			a.handleSyncFailed(r.Context(), app)		case "Failed", "Error":			a.handleSyncSucceeded(r.Context(), app)		case "Succeeded":		switch app.Status.OperationState.Phase {	if app.Status.OperationState != nil {	app := payload.Application	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {	var payload argoCDWebhookPayload	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *ArgoCDAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8113", mux)	log.Printf("ArgoCD adapter listening on :8113")	mux.HandleFunc("/api/v1/sync", adapter.HandleSync)	mux.HandleFunc("/api/v1/apps", adapter.HandleApps)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		httpClient: &http.Client{},		bus:        bus,		token:      token,		baseURL:    strings.TrimRight(baseURL, "/"),	adapter := &ArgoCDAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("ARGOCD_URL and ARGOCD_TOKEN are required")	if baseURL == "" || token == "" {	token := os.Getenv("ARGOCD_TOKEN")	baseURL := os.Getenv("ARGOCD_URL")func main() {}	Application argoCDApp `json:"application"`type argoCDWebhookPayload struct {}	} `json:"status"`		} `json:"health"`			Status string `json:"status"`		Health struct {		} `json:"sync"`			Status string `json:"status"`		Sync           struct {		OperationState *argoCDAppStatus `json:"operationState"`	Status struct {	} `json:"metadata"`		Name string `json:"name"`	Metadata struct {type argoCDApp struct {}	Message string `json:"message"`	Phase   string `json:"phase"`type argoCDAppStatus struct {}	httpClient *http.Client	bus        events.Bus	token      string	baseURL    stringtype ArgoCDAdapter struct {const argoCDAPIBase = "/api/v1")	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"
+)
+
+const argoCDAPIBase = "/api/v1"
+
+type ArgoCDAdapter struct {
+	baseURL    string
+	token      string
+	bus        events.Bus
+	httpClient *http.Client
+}
+
+type argoCDAppStatus struct {
+	Phase   string `json:"phase"`
+	Message string `json:"message"`
+}
+
+type argoCDApp struct {
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+Status struct {
+	OperationState *argoCDAppStatus `json:"operationState"`
+	Sync           struct {
+		Status string `json:"status"`
+	} `json:"sync"`
+Health struct {
+	Status string `json:"status"`
+} `json:"health"`
+} `json:"status"`
+}
+
+type argoCDWebhookPayload struct {
+	Application argoCDApp `json:"application"`
+}
+
+func main() {
+	baseURL := os.Getenv("ARGOCD_URL")
+	token := os.Getenv("ARGOCD_TOKEN")
+	if baseURL == "" || token == "" {
+		log.Fatal("ARGOCD_URL and ARGOCD_TOKEN are required")
+	}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &ArgoCDAdapter{
+	baseURL:    strings.TrimRight(baseURL, "/"),
+	token:      token,
+	bus:        bus,
+	httpClient: &http.Client{},
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/apps", adapter.HandleApps)
+mux.HandleFunc("/api/v1/sync", adapter.HandleSync)
+log.Printf("ArgoCD adapter listening on :8113")
+http.ListenAndServe(":8113", mux)
+}
+
+func (a *ArgoCDAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var payload argoCDWebhookPayload
+if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+app := payload.Application
+if app.Status.OperationState != nil {
+	switch app.Status.OperationState.Phase {
+		case "Succeeded":
+		a.handleSyncSucceeded(r.Context(), app)
+		case "Failed", "Error":
+		a.handleSyncFailed(r.Context(), app)
+		case "Running":
+		a.handleSyncRunning(r.Context(), app)
+	}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *ArgoCDAdapter) handleSyncSucceeded(ctx context.Context, app argoCDApp) {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"app_name":    app.Metadata.Name,
+		"sync_status": app.Status.Sync.Status,
+		"health":      app.Status.Health.Status,
+		"source":      "argocd",
+})
+if err := a.bus.Publish(ctx, events.Event{Type: events.DeploymentApproved, Payload: ep}); err != nil {
+	log.Printf("failed to publish deployment approved event: %v", err)
+}
+}
+
+func (a *ArgoCDAdapter) handleSyncFailed(ctx context.Context, app argoCDApp) {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"app_name": app.Metadata.Name,
+		"message":  app.Status.OperationState.Message,
+		"source":   "argocd",
+})
+if err := a.bus.Publish(ctx, events.Event{Type: events.TaskFailed, Payload: ep}); err != nil {
+	log.Printf("failed to publish task failed event: %v", err)
+}
+}
+
+func (a *ArgoCDAdapter) handleSyncRunning(ctx context.Context, app argoCDApp) {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"app_name": app.Metadata.Name,
+		"source":   "argocd",
+})
+if err := a.bus.Publish(ctx, events.Event{Type: events.TaskStarted, Payload: ep}); err != nil {
+	log.Printf("failed to publish task started event: %v", err)
+}
+}
+
+func (a *ArgoCDAdapter) HandleApps(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+
+var result map[string]interface{}
+if err := a.argoRequest(r.Context(), http.MethodGet, "/applications", nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *ArgoCDAdapter) HandleSync(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+appName := r.URL.Query().Get("app")
+if appName == "" {
+	http.Error(w, "app query parameter is required", http.StatusBadRequest)
+	return
+}
+
+var result map[string]interface{}
+if err := a.argoRequest(r.Context(), http.MethodPost, fmt.Sprintf("/applications/%s/sync", appName), map[string]interface{}{}, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+
+func (a *ArgoCDAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{events.DeploymentRequested}, func(e events.Event) error {
+		return nil
+})
+}
+
+func (a *ArgoCDAdapter) argoRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, a.baseURL+argoCDAPIBase+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", "Bearer "+a.token)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("argocd API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

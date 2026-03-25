@@ -1,256 +1,247 @@
-package zephyr
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("zephyr API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Authorization", "Bearer "+a.apiToken)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, zephyrAPIBase+path, bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *ZephyrAdapter) zephyrRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	})		return nil	a.bus.Subscribe(ctx, []events.EventType{events.ReviewApproved}, func(e events.Event) error {	ctx := context.Background()func (a *ZephyrAdapter) subscribeToEvents() {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testcases?projectKey=%s", projectKey), nil, &result); err != nil {		var result interface{}		}			projectKey = a.projectKey		if projectKey == "" {		projectKey := r.URL.Query().Get("project_key")	case http.MethodGet:	switch r.Method {func (a *ZephyrAdapter) HandleTestCases(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.WriteHeader(http.StatusCreated)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.zephyrRequest(r.Context(), http.MethodPost, "/testexecutions", body, &result); err != nil {		var result interface{}		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {		var body interface{}	case http.MethodPost:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testexecutions?testCycle=%s", cycleKey), nil, &result); err != nil {		var result interface{}		}			return			http.Error(w, "cycle_key query parameter is required", http.StatusBadRequest)		if cycleKey == "" {		cycleKey := r.URL.Query().Get("cycle_key")	case http.MethodGet:	switch r.Method {func (a *ZephyrAdapter) HandleExecutions(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.WriteHeader(http.StatusCreated)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.zephyrRequest(r.Context(), http.MethodPost, "/testcycles", body, &result); err != nil {		var result interface{}		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {		var body interface{}	case http.MethodPost:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testcycles?projectKey=%s", projectKey), nil, &result); err != nil {		var result interface{}		}			projectKey = a.projectKey		if projectKey == "" {		projectKey := r.URL.Query().Get("project_key")	case http.MethodGet:	switch r.Method {func (a *ZephyrAdapter) HandleCycles(w http.ResponseWriter, r *http.Request) {}	w.WriteHeader(http.StatusOK)	}		}			a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep})			})				"source":        "zephyr",				"test_case_key": payload.TestExecution.TestCaseKey,				"execution_key": payload.TestExecution.Key,			ep, _ := json.Marshal(map[string]interface{}{		if strings.ToUpper(payload.TestExecution.StatusName) == "FAIL" {	case "testExecution_updated":		}			a.bus.Publish(r.Context(), events.Event{Type: events.TaskBlocked, Payload: ep})			})				"source":      "zephyr",				"project_key": payload.TestCycle.ProjectKey,				"cycle_name":  payload.TestCycle.Name,				"cycle_key":   payload.TestCycle.Key,			ep, _ := json.Marshal(map[string]interface{}{		case "FAILED":			a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep})			})				"source":      "zephyr",				"project_key": payload.TestCycle.ProjectKey,				"cycle_name":  payload.TestCycle.Name,				"cycle_key":   payload.TestCycle.Key,			ep, _ := json.Marshal(map[string]interface{}{		case "DONE", "PASSED":		switch strings.ToUpper(payload.TestCycle.Status) {	case "testCycle_updated":	switch payload.WebhookEvent {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {	var payload zephyrWebhookPayload	}		}			return			http.Error(w, "unauthorized", http.StatusUnauthorized)		if r.Header.Get("X-Zephyr-Secret") != secret {	if secret := os.Getenv("ZEPHYR_WEBHOOK_SECRET"); secret != "" {	// Authenticate via shared secret header	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *ZephyrAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8132", mux)	log.Printf("Zephyr Scale adapter listening on :8132")	mux.HandleFunc("/api/v1/cases", adapter.HandleTestCases)	mux.HandleFunc("/api/v1/executions", adapter.HandleExecutions)	mux.HandleFunc("/api/v1/cycles", adapter.HandleCycles)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		httpClient: &http.Client{},		bus:        bus,		projectKey: os.Getenv("ZEPHYR_PROJECT_KEY"),		apiToken:   os.Getenv("ZEPHYR_API_TOKEN"),	adapter := &ZephyrAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")func main() {}	} `json:"testExecution"`		TestCaseKey string `json:"testCaseKey"`		StatusName  string `json:"statusName"`		Key         string `json:"key"`		ID          string `json:"id"`	TestExecution struct {	} `json:"testCycle"`		ProjectKey string `json:"projectKey"`		Status     string `json:"status"`		Name       string `json:"name"`		Key        string `json:"key"`		ID         string `json:"id"`	TestCycle    struct {	WebhookEvent string `json:"webhookEvent"`type zephyrWebhookPayload struct {}	httpClient *http.Client	bus        events.Bus	projectKey string	apiToken   stringtype ZephyrAdapter struct {const zephyrAPIBase = "https://api.zephyrscale.smartbear.com/v2"// bridge for the QA agent to create/report test cycles directly.// API. It receives test cycle and execution result webhooks and exposes a REST// Zephyr Scale adapter integrates with the Zephyr Scale (TM4J) test management)	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"
+)
+
+const zephyrAPIBase = "https://api.zephyrscale.smartbear.com/v2"// bridge for the QA agent to create/report test cycles directly.// API. It receives test cycle and execution result webhooks and exposes a REST// Zephyr Scale adapter integrates with the Zephyr Scale (TM4J) test management)
+
+type ZephyrAdapter struct {
+	apiToken   string
+	projectKey string
+	bus        events.Bus
+	httpClient *http.Client
+}
+
+type zephyrWebhookPayload struct {
+	WebhookEvent string `json:"webhookEvent"`
+	TestCycle    struct {
+		ID         string `json:"id"`
+		Key        string `json:"key"`
+		Name       string `json:"name"`
+		Status     string `json:"status"`
+		ProjectKey string `json:"projectKey"`
+	} `json:"testCycle"`
+TestExecution struct {
+	ID          string `json:"id"`
+	Key         string `json:"key"`
+	StatusName  string `json:"statusName"`
+	TestCaseKey string `json:"testCaseKey"`
+} `json:"testExecution"`
+}
+
+func main() {
+	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+	if err != nil {
+		log.Fatalf("failed to create event bus: %v", err)
+	}
+adapter := &ZephyrAdapter{
+	apiToken:   os.Getenv("ZEPHYR_API_TOKEN"),
+	projectKey: os.Getenv("ZEPHYR_PROJECT_KEY"),
+	bus:        bus,
+	httpClient: &http.Client{},
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/cycles", adapter.HandleCycles)
+mux.HandleFunc("/api/v1/executions", adapter.HandleExecutions)
+mux.HandleFunc("/api/v1/cases", adapter.HandleTestCases)
+log.Printf("Zephyr Scale adapter listening on :8132")
+http.ListenAndServe(":8132", mux)
+}
+
+func (a *ZephyrAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+// Authenticate via shared secret header
+if secret := os.Getenv("ZEPHYR_WEBHOOK_SECRET"); secret != "" {
+	if r.Header.Get("X-Zephyr-Secret") != secret {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+}
+
+var payload zephyrWebhookPayload
+if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+switch payload.WebhookEvent {
+	case "testCycle_updated":
+	switch strings.ToUpper(payload.TestCycle.Status) {
+		case "DONE", "PASSED":
+		ep, _ := json.Marshal(map[string]interface{}{
+			"cycle_key":   payload.TestCycle.Key,
+			"cycle_name":  payload.TestCycle.Name,
+			"project_key": payload.TestCycle.ProjectKey,
+			"source":      "zephyr",
+	})
+a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep})
+case "FAILED":
+ep, _ := json.Marshal(map[string]interface{}{
+	"cycle_key":   payload.TestCycle.Key,
+	"cycle_name":  payload.TestCycle.Name,
+	"project_key": payload.TestCycle.ProjectKey,
+	"source":      "zephyr",
+})
+a.bus.Publish(r.Context(), events.Event{Type: events.TaskBlocked, Payload: ep})
+}
+case "testExecution_updated":
+if strings.ToUpper(payload.TestExecution.StatusName) == "FAIL" {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"execution_key": payload.TestExecution.Key,
+		"test_case_key": payload.TestExecution.TestCaseKey,
+		"source":        "zephyr",
+})
+a.bus.Publish(r.Context(), events.Event{Type: events.EscalationCreated, Payload: ep})
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *ZephyrAdapter) HandleCycles(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		projectKey := r.URL.Query().Get("project_key")
+		if projectKey == "" {
+			projectKey = a.projectKey
+		}
+
+var result interface{}
+if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testcycles?projectKey=%s", projectKey), nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+case http.MethodPost:
+
+var body interface{}
+if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result interface{}
+if err := a.zephyrRequest(r.Context(), http.MethodPost, "/testcycles", body, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+w.WriteHeader(http.StatusCreated)
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *ZephyrAdapter) HandleExecutions(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		cycleKey := r.URL.Query().Get("cycle_key")
+		if cycleKey == "" {
+			http.Error(w, "cycle_key query parameter is required", http.StatusBadRequest)
+			return
+		}
+
+var result interface{}
+if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testexecutions?testCycle=%s", cycleKey), nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+case http.MethodPost:
+
+var body interface{}
+if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result interface{}
+if err := a.zephyrRequest(r.Context(), http.MethodPost, "/testexecutions", body, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+w.WriteHeader(http.StatusCreated)
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *ZephyrAdapter) HandleTestCases(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		projectKey := r.URL.Query().Get("project_key")
+		if projectKey == "" {
+			projectKey = a.projectKey
+		}
+
+var result interface{}
+if err := a.zephyrRequest(r.Context(), http.MethodGet, fmt.Sprintf("/testcases?projectKey=%s", projectKey), nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *ZephyrAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{events.ReviewApproved}, func(e events.Event) error {
+		return nil
+})
+}
+
+func (a *ZephyrAdapter) zephyrRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, zephyrAPIBase+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Authorization", "Bearer "+a.apiToken)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("zephyr API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

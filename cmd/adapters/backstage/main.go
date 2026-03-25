@@ -1,195 +1,185 @@
-package backstage
 package main
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("backstage API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	}		req.Header.Set("Authorization", "Bearer "+a.token)	if a.token != "" {	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *BackstageAdapter) bsRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	})		return nil	a.bus.Subscribe(ctx, []events.EventType{events.TaskCreated}, func(e events.Event) error {	ctx := context.Background()func (a *BackstageAdapter) subscribeToEvents() {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.bsRequest(r.Context(), http.MethodGet, path, nil, &result); err != nil {		var result interface{}		}			path = "/api/catalog/entities?filter=kind=Component"		if name == "" {		path := fmt.Sprintf("/api/catalog/entities/by-name/component/%s/%s", namespace, name)		}			namespace = "default"		if namespace == "" {		namespace := r.URL.Query().Get("namespace")		name := r.URL.Query().Get("name")	case http.MethodGet:	switch r.Method {func (a *BackstageAdapter) HandleComponents(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.bsRequest(r.Context(), http.MethodGet, path, nil, &result); err != nil {		var result interface{}		}			path += "?filter=kind=" + kind		if kind != "" {		path := "/api/catalog/entities"		kind := r.URL.Query().Get("kind")	case http.MethodGet:	switch r.Method {func (a *BackstageAdapter) HandleEntities(w http.ResponseWriter, r *http.Request) {}	w.WriteHeader(http.StatusOK)	}		}			log.Printf("failed to publish task failed event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskFailed, Payload: ep}); err != nil {		})			"source":   "backstage",			"template": payload.Task.Spec.TemplateName,			"task_id":  payload.Task.ID,		ep, _ := json.Marshal(map[string]interface{}{	case "failed":		}			log.Printf("failed to publish task completed event: %v", err)		if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {		})			"source":   "backstage",			"values":   payload.Task.Spec.Values,			"template": payload.Task.Spec.TemplateName,			"task_id":  payload.Task.ID,		ep, _ := json.Marshal(map[string]interface{}{	case "completed":	switch payload.Task.Status {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {	var payload backstageScaffolderEvent	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *BackstageAdapter) HandleScaffolderWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8129", mux)	log.Printf("Backstage adapter listening on :8129")	mux.HandleFunc("/api/v1/components", adapter.HandleComponents)	mux.HandleFunc("/api/v1/entities", adapter.HandleEntities)	mux.HandleFunc("/webhook/scaffolder", adapter.HandleScaffolderWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		httpClient: &http.Client{},		bus:        bus,		token:      os.Getenv("BACKSTAGE_TOKEN"),		baseURL:    strings.TrimRight(baseURL, "/"),	adapter := &BackstageAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("BACKSTAGE_URL is required")	if baseURL == "" {	baseURL := os.Getenv("BACKSTAGE_URL")func main() {}	} `json:"task"`		} `json:"spec"`			Values       map[string]interface{} `json:"values"`			TemplateName string `json:"templateName"`		Spec   struct {		Status string `json:"status"`		ID     string `json:"id"`	Task struct {type backstageScaffolderEvent struct {}	httpClient *http.Client	bus        events.Bus	token      string	baseURL    stringtype BackstageAdapter struct {// scaffolder task completion events via a custom webhook.// Software Catalog and TechDocs APIs. It also supports receiving Backstage// Backstage adapter exposes a REST bridge between Forge and Backstage's)	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"	"io"	"fmt"	"encoding/json"	"context"import (
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
+)
+
+// scaffolder task completion events via a custom webhook.
+// Software Catalog and TechDocs APIs. It also supports receiving Backstage
+// Backstage adapter exposes a REST bridge between Forge and Backstage's)
+
+type BackstageAdapter struct {
+	baseURL    string
+	token      string
+	bus        events.Bus
+	httpClient *http.Client
+}
+
+type backstageScaffolderEvent struct {
+	Task struct {
+		ID     string `json:"id"`
+		Status string `json:"status"`
+		Spec   struct {
+			TemplateName string `json:"templateName"`
+			Values       map[string]interface{} `json:"values"`
+		} `json:"spec"`
+} `json:"task"`
+}
+
+func main() {
+	baseURL := os.Getenv("BACKSTAGE_URL")
+	if baseURL == "" {
+		log.Fatal("BACKSTAGE_URL is required")
+	}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &BackstageAdapter{
+	baseURL:    strings.TrimRight(baseURL, "/"),
+	token:      os.Getenv("BACKSTAGE_TOKEN"),
+	bus:        bus,
+	httpClient: &http.Client{},
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook/scaffolder", adapter.HandleScaffolderWebhook)
+mux.HandleFunc("/api/v1/entities", adapter.HandleEntities)
+mux.HandleFunc("/api/v1/components", adapter.HandleComponents)
+log.Printf("Backstage adapter listening on :8129")
+http.ListenAndServe(":8129", mux)
+}
+
+func (a *BackstageAdapter) HandleScaffolderWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+var payload backstageScaffolderEvent
+if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+switch payload.Task.Status {
+	case "completed":
+	ep, _ := json.Marshal(map[string]interface{}{
+		"task_id":  payload.Task.ID,
+		"template": payload.Task.Spec.TemplateName,
+		"values":   payload.Task.Spec.Values,
+		"source":   "backstage",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {
+	log.Printf("failed to publish task completed event: %v", err)
+}
+case "failed":
+ep, _ := json.Marshal(map[string]interface{}{
+	"task_id":  payload.Task.ID,
+	"template": payload.Task.Spec.TemplateName,
+	"source":   "backstage",
+})
+if err := a.bus.Publish(r.Context(), events.Event{Type: events.TaskFailed, Payload: ep}); err != nil {
+	log.Printf("failed to publish task failed event: %v", err)
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *BackstageAdapter) HandleEntities(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		kind := r.URL.Query().Get("kind")
+		path := "/api/catalog/entities"
+		if kind != "" {
+			path += "?filter=kind=" + kind
+		}
+
+var result interface{}
+if err := a.bsRequest(r.Context(), http.MethodGet, path, nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *BackstageAdapter) HandleComponents(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		name := r.URL.Query().Get("name")
+		namespace := r.URL.Query().Get("namespace")
+		if namespace == "" {
+			namespace = "default"
+		}
+	path := fmt.Sprintf("/api/catalog/entities/by-name/component/%s/%s", namespace, name)
+	if name == "" {
+		path = "/api/catalog/entities?filter=kind=Component"
+	}
+
+var result interface{}
+if err := a.bsRequest(r.Context(), http.MethodGet, path, nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *BackstageAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{events.TaskCreated}, func(e events.Event) error {
+		return nil
+})
+}
+
+func (a *BackstageAdapter) bsRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, a.baseURL+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+if a.token != "" {
+	req.Header.Set("Authorization", "Bearer "+a.token)
+}
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("backstage API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}

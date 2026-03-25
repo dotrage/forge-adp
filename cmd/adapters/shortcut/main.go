@@ -1,7 +1,11 @@
-package shortcut
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"github.com/dotrage/forge-adp/pkg/events"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -9,243 +13,230 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	return nil	}		}			return fmt.Errorf("decode response: %w", err)		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {	if out != nil {	}		return fmt.Errorf("shortcut API error %d: %s", resp.StatusCode, string(b))		b, _ := io.ReadAll(resp.Body)	if resp.StatusCode >= 300 {	defer resp.Body.Close()	}		return fmt.Errorf("execute request: %w", err)	if err != nil {	resp, err := a.httpClient.Do(req)	req.Header.Set("Content-Type", "application/json")	req.Header.Set("Shortcut-Token", a.token)	}		return fmt.Errorf("create request: %w", err)	if err != nil {	req, err := http.NewRequestWithContext(ctx, method, shortcutAPIBase+path, bodyReader)	}		bodyReader = strings.NewReader(string(b))		}			return fmt.Errorf("marshal request: %w", err)		if err != nil {		b, err := json.Marshal(body)	if body != nil {	var bodyReader io.Readerfunc (a *ShortcutAdapter) scRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {}	})		return nil	}, func(e events.Event) error {		events.TaskBlocked,		events.TaskFailed,		events.TaskCompleted,	a.bus.Subscribe(ctx, []events.EventType{	ctx := context.Background()func (a *ShortcutAdapter) subscribeToEvents() {}	json.NewEncoder(w).Encode(result)	w.Header().Set("Content-Type", "application/json")	}		return		http.Error(w, err.Error(), http.StatusInternalServerError)	if err := a.scRequest(r.Context(), http.MethodPut, "/stories/"+id, req, &result); err != nil {	var result map[string]interface{}	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {	var req map[string]interface{}	}		return		http.Error(w, "id query parameter is required", http.StatusBadRequest)	if id == "" {	id := r.URL.Query().Get("id")	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *ShortcutAdapter) HandleTransitions(w http.ResponseWriter, r *http.Request) {}	}		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	default:		json.NewEncoder(w).Encode(result)		w.WriteHeader(http.StatusCreated)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.scRequest(r.Context(), http.MethodPost, "/stories", req, &result); err != nil {		var result map[string]interface{}		}			return			http.Error(w, err.Error(), http.StatusBadRequest)		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {		var req map[string]interface{}	case http.MethodPost:		json.NewEncoder(w).Encode(result)		w.Header().Set("Content-Type", "application/json")		}			return			http.Error(w, err.Error(), http.StatusInternalServerError)		if err := a.scRequest(r.Context(), http.MethodGet, "/stories/"+id, nil, &result); err != nil {		var result map[string]interface{}		}			return			http.Error(w, "id query parameter is required", http.StatusBadRequest)		if id == "" {		id := r.URL.Query().Get("id")	case http.MethodGet:	switch r.Method {func (a *ShortcutAdapter) HandleStories(w http.ResponseWriter, r *http.Request) {}	}		}			log.Printf("failed to publish task completed event: %v", err)		if err := a.bus.Publish(ctx, events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {		})			"source":   "shortcut",			"story_id": action.ID,		ep, _ := json.Marshal(map[string]interface{}{	if completedAt, ok := changes["completed_at"]; ok && completedAt != nil {	changes := action.Changesfunc (a *ShortcutAdapter) handleStoryUpdated(ctx context.Context, action shortcutWebhookAction) {}	}		log.Printf("failed to publish task created event: %v", err)	if err := a.bus.Publish(ctx, events.Event{Type: events.TaskCreated, Payload: ep}); err != nil {	})		"source":   "shortcut",		"story_id": action.ID,	ep, _ := json.Marshal(map[string]interface{}{func (a *ShortcutAdapter) handleStoryCreated(ctx context.Context, action shortcutWebhookAction) {}	w.WriteHeader(http.StatusOK)	}		}			a.handleStoryUpdated(r.Context(), action)		case "update":			a.handleStoryCreated(r.Context(), action)		case "create":		switch action.Action {		}			continue		if action.EntityType != "story" {	for _, action := range payload.Actions {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err := json.Unmarshal(body, &payload); err != nil {	var payload shortcutWebhookPayload	}		}			return			http.Error(w, "invalid signature", http.StatusUnauthorized)		if !hmac.Equal([]byte(expected), []byte(sig)) {		expected := "sha256=" + hex.EncodeToString(mac.Sum(nil))		mac.Write(body)		mac := hmac.New(sha256.New, []byte(a.webhookSecret))		sig := r.Header.Get("Shortcut-Signature")	if a.webhookSecret != "" {	}		return		http.Error(w, err.Error(), http.StatusBadRequest)	if err != nil {	body, err := io.ReadAll(r.Body)	}		return		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)	if r.Method != http.MethodPost {func (a *ShortcutAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {}	http.ListenAndServe(":8125", mux)	log.Printf("Shortcut (Clubhouse) adapter listening on :8125")	mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)	mux.HandleFunc("/api/v1/stories", adapter.HandleStories)	mux.HandleFunc("/webhook", adapter.HandleWebhook)	})		w.WriteHeader(http.StatusOK)	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {	mux := http.NewServeMux()	go adapter.subscribeToEvents()	}		httpClient:    &http.Client{},		bus:           bus,		webhookSecret: os.Getenv("SHORTCUT_WEBHOOK_SECRET"),		token:         token,	adapter := &ShortcutAdapter{	}		log.Fatalf("failed to create event bus: %v", err)	if err != nil {	bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")	}		log.Fatal("SHORTCUT_API_TOKEN is required")	if token == "" {	token := os.Getenv("SHORTCUT_API_TOKEN")func main() {}	Actions []shortcutWebhookAction `json:"actions"`type shortcutWebhookPayload struct {}	Changes    map[string]interface{} `json:"changes"`	ID         int           `json:"id"`	EntityType string        `json:"entity_type"`	Action     string        `json:"action"`type shortcutWebhookAction struct {}	AppURL      string   `json:"app_url"`	Labels      []struct{ Name string `json:"name"` } `json:"labels"`	WorkflowStateID int  `json:"workflow_state_id"`	StoryType   string   `json:"story_type"`	Name        string   `json:"name"`	ID          int      `json:"id"`type shortcutStory struct {}	httpClient    *http.Client	bus           events.Bus	webhookSecret string	token         stringtype ShortcutAdapter struct {const shortcutAPIBase = "https://api.app.shortcut.com/api/v3")	"github.com/dotrage/forge-adp/pkg/events"	"strings"	"os"	"net/http"	"log"
+)
+
+const shortcutAPIBase = "https://api.app.shortcut.com/api/v3"
+
+type ShortcutAdapter struct {
+	token         string
+	webhookSecret string
+	bus           events.Bus
+	httpClient    *http.Client
+}
+
+type shortcutStory struct {
+	ID          int      `json:"id"`
+	Name        string   `json:"name"`
+	StoryType   string   `json:"story_type"`
+	WorkflowStateID int  `json:"workflow_state_id"`
+	Labels      []struct{ Name string `json:"name"` } `json:"labels"`
+	AppURL      string   `json:"app_url"`
+}
+
+type shortcutWebhookAction struct {
+	Action     string        `json:"action"`
+	EntityType string        `json:"entity_type"`
+	ID         int           `json:"id"`
+	Changes    map[string]interface{} `json:"changes"`
+}
+
+type shortcutWebhookPayload struct {
+	Actions []shortcutWebhookAction `json:"actions"`
+}
+
+func main() {
+	token := os.Getenv("SHORTCUT_API_TOKEN")
+	if token == "" {
+		log.Fatal("SHORTCUT_API_TOKEN is required")
+	}
+bus, err := events.NewRedisBus(os.Getenv("REDIS_ADDR"), "forge:events")
+if err != nil {
+	log.Fatalf("failed to create event bus: %v", err)
+}
+adapter := &ShortcutAdapter{
+	token:         token,
+	webhookSecret: os.Getenv("SHORTCUT_WEBHOOK_SECRET"),
+	bus:           bus,
+	httpClient:    &http.Client{},
+}
+go adapter.subscribeToEvents()
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+})
+mux.HandleFunc("/webhook", adapter.HandleWebhook)
+mux.HandleFunc("/api/v1/stories", adapter.HandleStories)
+mux.HandleFunc("/api/v1/transitions", adapter.HandleTransitions)
+log.Printf("Shortcut (Clubhouse) adapter listening on :8125")
+http.ListenAndServe(":8125", mux)
+}
+
+func (a *ShortcutAdapter) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+body, err := io.ReadAll(r.Body)
+if err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+if a.webhookSecret != "" {
+	sig := r.Header.Get("Shortcut-Signature")
+	mac := hmac.New(sha256.New, []byte(a.webhookSecret))
+	mac.Write(body)
+	expected := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+	if !hmac.Equal([]byte(expected), []byte(sig)) {
+		http.Error(w, "invalid signature", http.StatusUnauthorized)
+		return
+	}
+}
+
+var payload shortcutWebhookPayload
+if err := json.Unmarshal(body, &payload); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+for _, action := range payload.Actions {
+	if action.EntityType != "story" {
+		continue
+	}
+switch action.Action {
+	case "create":
+	a.handleStoryCreated(r.Context(), action)
+	case "update":
+	a.handleStoryUpdated(r.Context(), action)
+}
+}
+w.WriteHeader(http.StatusOK)
+}
+
+func (a *ShortcutAdapter) handleStoryCreated(ctx context.Context, action shortcutWebhookAction) {
+	ep, _ := json.Marshal(map[string]interface{}{
+		"story_id": action.ID,
+		"source":   "shortcut",
+})
+if err := a.bus.Publish(ctx, events.Event{Type: events.TaskCreated, Payload: ep}); err != nil {
+	log.Printf("failed to publish task created event: %v", err)
+}
+}
+
+func (a *ShortcutAdapter) handleStoryUpdated(ctx context.Context, action shortcutWebhookAction) {
+	changes := action.Changes
+	if completedAt, ok := changes["completed_at"]; ok && completedAt != nil {
+		ep, _ := json.Marshal(map[string]interface{}{
+			"story_id": action.ID,
+			"source":   "shortcut",
+	})
+if err := a.bus.Publish(ctx, events.Event{Type: events.TaskCompleted, Payload: ep}); err != nil {
+	log.Printf("failed to publish task completed event: %v", err)
+}
+}
+}
+
+func (a *ShortcutAdapter) HandleStories(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case http.MethodGet:
+		id := r.URL.Query().Get("id")
+		if id == "" {
+			http.Error(w, "id query parameter is required", http.StatusBadRequest)
+			return
+		}
+
+var result map[string]interface{}
+if err := a.scRequest(r.Context(), http.MethodGet, "/stories/"+id, nil, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+case http.MethodPost:
+
+var req map[string]interface{}
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result map[string]interface{}
+if err := a.scRequest(r.Context(), http.MethodPost, "/stories", req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+w.WriteHeader(http.StatusCreated)
+json.NewEncoder(w).Encode(result)
+default:
+http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+}
+
+func (a *ShortcutAdapter) HandleTransitions(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+id := r.URL.Query().Get("id")
+if id == "" {
+	http.Error(w, "id query parameter is required", http.StatusBadRequest)
+	return
+}
+
+var req map[string]interface{}
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	http.Error(w, err.Error(), http.StatusBadRequest)
+	return
+}
+
+var result map[string]interface{}
+if err := a.scRequest(r.Context(), http.MethodPut, "/stories/"+id, req, &result); err != nil {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
+}
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(result)
+}
+
+func (a *ShortcutAdapter) subscribeToEvents() {
+	ctx := context.Background()
+	a.bus.Subscribe(ctx, []events.EventType{
+		events.TaskCompleted,
+		events.TaskFailed,
+		events.TaskBlocked,
+	}, func(e events.Event) error {
+	return nil
+})
+}
+
+func (a *ShortcutAdapter) scRequest(ctx context.Context, method, path string, body interface{}, out interface{}) error {
+
+var bodyReader io.Reader
+if body != nil {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal request: %w", err)
+	}
+bodyReader = strings.NewReader(string(b))
+}
+req, err := http.NewRequestWithContext(ctx, method, shortcutAPIBase+path, bodyReader)
+if err != nil {
+	return fmt.Errorf("create request: %w", err)
+}
+req.Header.Set("Shortcut-Token", a.token)
+req.Header.Set("Content-Type", "application/json")
+resp, err := a.httpClient.Do(req)
+if err != nil {
+	return fmt.Errorf("execute request: %w", err)
+}
+defer resp.Body.Close()
+if resp.StatusCode >= 300 {
+	b, _ := io.ReadAll(resp.Body)
+	return fmt.Errorf("shortcut API error %d: %s", resp.StatusCode, string(b))
+}
+if out != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+}
+return nil
+}
