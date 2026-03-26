@@ -42,7 +42,8 @@ Forge is built around four core principles:
 
 | Agent | Primary Function |
 |---|---|
-| **PM** | Decompose requirements into structured Jira tickets |
+| **PM** | Decompose requirements into structured Jira tickets, bootstrap project plan documents |
+| **Architect** | Analyse requirements, design system architecture, data models, and API contracts |
 | **Frontend Developer** | Implement UI features from UX specs and API contracts |
 | **Backend Developer** | Implement APIs, business logic, and service integrations |
 | **DBA** | Design schemas, generate migrations, optimize queries |

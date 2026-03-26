@@ -11,16 +11,19 @@ from .runtime import (
     BaseAgent, AgentIdentity, Task, TaskStatus,
     LLMProvider, PlanReader, MemoryStore
 )
+from .architect import ArchitectAgent
 from .backend_developer import BackendDeveloperAgent
 from .governance import GovernanceAgent
+from .pm import PMAgent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 AGENT_CLASSES: dict[str, Type[BaseAgent]] = {
+    "architect": ArchitectAgent,
     "backend-developer": BackendDeveloperAgent,
     "governance": GovernanceAgent,
-    # Add other agents as implemented
+    "pm": PMAgent,
 }
 
 

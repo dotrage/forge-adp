@@ -52,7 +52,7 @@ func main() {
 
 	// Agents
 	var agents string
-	flag.StringVar(&agents, "agents", "pm,backend-developer,frontend-developer,qa,secops", "Comma-separated agent roles")
+	flag.StringVar(&agents, "agents", "pm,architect,backend-developer,frontend-developer,qa,secops", "Comma-separated agent roles")
 
 	targetDir := flag.String("output", ".", "Output directory")
 
