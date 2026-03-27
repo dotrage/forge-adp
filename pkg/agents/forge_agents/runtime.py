@@ -89,41 +89,123 @@ class LLMProvider:
 
 
 class PlanReader:
-    """Reads plan documents from project repositories."""
+    """Reads plan documents from project repositories or local directories,
+    with cross-repo support for platforms."""
+
+    PLAN_FILES = [
+        "PRODUCT.md", "ARCHITECTURE.md", "API_CONTRACTS.md",
+        "DATA_MODEL.md", "UX_GUIDELINES.md", "SECURITY_POLICY.md",
+        "INFRASTRUCTURE.md", "TEST_STRATEGY.md", "CONTRIBUTING.md",
+        "GLOSSARY.md", "config.yaml"
+    ]
 
     def __init__(self, github_adapter_url: str):
         self.github_adapter = github_adapter_url
         self.client = httpx.Client()
 
-    def load_plans(self, repo: str, branch: str = "main") -> dict[str, str]:
-        """Load all .forge/ plan documents from a repository."""
+    def _load_file_from_github(self, repo: str, path: str, branch: str = "main") -> Optional[str]:
+        """Load a single file from a GitHub repository via the adapter."""
+        try:
+            response = self.client.get(
+                f"{self.github_adapter}/api/v1/files",
+                params={"repo": repo, "path": path, "ref": branch}
+            )
+            if response.status_code == 200:
+                return response.json()["content"]
+        except Exception as e:
+            logger.warning(f"Could not load {repo}:{path}: {e}")
+        return None
+
+    @staticmethod
+    def _load_file_from_disk(local_path: str, path: str) -> Optional[str]:
+        """Load a single file from the local filesystem."""
+        full_path = os.path.join(local_path, path)
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            return None
+        except Exception as e:
+            logger.warning(f"Could not load {full_path}: {e}")
+            return None
+
+    def _load_file(self, source: str, path: str, branch: str = "main") -> Optional[str]:
+        """Load a file from either a local path or a GitHub repo.
+
+        If `source` is an absolute path that exists on disk, reads locally.
+        Otherwise treats it as a GitHub org/repo reference.
+        """
+        if os.path.isabs(source) and os.path.isdir(source):
+            return self._load_file_from_disk(source, path)
+        return self._load_file_from_github(source, path, branch)
+
+    def load_plans(self, source: str, branch: str = "main") -> dict[str, str]:
+        """Load all .forge/ plan documents from a repository or local directory.
+
+        Args:
+            source: Either a GitHub repo (org/repo) or an absolute local directory path.
+            branch: Git branch (only used for GitHub sources).
+        """
         plans = {}
-        plan_files = [
-            "PRODUCT.md", "ARCHITECTURE.md", "API_CONTRACTS.md",
-            "DATA_MODEL.md", "UX_GUIDELINES.md", "SECURITY_POLICY.md",
-            "INFRASTRUCTURE.md", "TEST_STRATEGY.md", "CONTRIBUTING.md",
-            "GLOSSARY.md", "config.yaml"
-        ]
-
-        for filename in plan_files:
-            path = f".forge/{filename}"
-            try:
-                response = self.client.get(
-                    f"{self.github_adapter}/api/v1/files",
-                    params={"repo": repo, "path": path, "ref": branch}
-                )
-                if response.status_code == 200:
-                    plans[filename] = response.json()["content"]
-            except Exception as e:
-                logger.warning(f"Could not load {path}: {e}")
-
+        for filename in self.PLAN_FILES:
+            content = self._load_file(source, f".forge/{filename}", branch)
+            if content is not None:
+                plans[filename] = content
         return plans
+
+    def load_platform_plans(self, source: str, branch: str = "main") -> dict[str, dict[str, str]]:
+        """Load plan documents from all repos/directories in a platform.
+
+        Returns a dict keyed by repo role (e.g. "api", "ui", "workers"),
+        where each value is the plan documents dict for that source.
+        The current source is keyed as "self".
+
+        If the current source's config.yaml does not define a platform section,
+        returns only {"self": plans} for backwards compatibility.
+        """
+        own_plans = self.load_plans(source, branch)
+        platform_plans: dict[str, dict[str, str]] = {"self": own_plans}
+
+        config = self.get_config(own_plans)
+        platform = config.get("forge", {}).get("platform")
+        if not platform or "repos" not in platform:
+            return platform_plans
+
+        # Determine which entry is "self" so we skip it
+        current_repo = config.get("forge", {}).get("integrations", {}).get("github", {}).get("repo", "")
+
+        for repo_entry in platform["repos"]:
+            role = repo_entry.get("role", "")
+            local_path = repo_entry.get("local_path", "")
+            sibling_repo = repo_entry.get("repo", "")
+
+            # Resolve the source for this sibling
+            sibling_source = local_path if local_path else sibling_repo
+            if not sibling_source:
+                continue
+
+            # Skip self (match on either repo name or local_path)
+            if sibling_repo and sibling_repo == current_repo:
+                continue
+            if local_path and os.path.isabs(source) and os.path.abspath(local_path) == os.path.abspath(source):
+                continue
+
+            sibling_plans = self.load_plans(sibling_source, branch)
+            if sibling_plans:
+                platform_plans[role] = sibling_plans
+
+        return platform_plans
 
     def get_config(self, plans: dict[str, str]) -> dict:
         """Parse the config.yaml from loaded plans."""
         if "config.yaml" in plans:
             return yaml.safe_load(plans["config.yaml"])
         return {}
+
+    def get_platform_repos(self, plans: dict[str, str]) -> list[dict]:
+        """Extract the platform repos list from config, or empty list if single-repo."""
+        config = self.get_config(plans)
+        return config.get("forge", {}).get("platform", {}).get("repos", [])
 
 
 class MemoryStore:

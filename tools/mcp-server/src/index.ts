@@ -82,7 +82,7 @@ const TOOLS: Tool[] = [
         agent_role: {
           type: "string",
           description:
-            "The agent role to assign the task to (e.g. backend-developer, qa, devops, sre, secops, pm, dba, frontend-developer).",
+            "The agent role to assign the task to (e.g. backend-developer, frontend-developer, architect, pm, qa, devops, sre, secops, dba, governance).",
         },
         title: {
           type: "string",
@@ -257,6 +257,107 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "forge_bootstrap_project",
+    description:
+      "Bootstrap a new project by triggering the PM agent's project-bootstrap skill. " +
+      "This populates the seeded .forge/ plan documents (PRODUCT.md, ARCHITECTURE.md, etc.) " +
+      "with real content derived from the product brief. The PM agent generates product docs " +
+      "and delegates technical docs to the Architect agent. Returns a task ID to track progress.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: {
+          type: "string",
+          description:
+            "GitHub repository in org/repo format (e.g. acme-corp/my-project). Must already contain a seeded .forge/ directory.",
+        },
+        product_brief: {
+          type: "string",
+          description:
+            "Detailed product description including: what the product does, who it's for, " +
+            "core features, key constraints, and success criteria. The richer this is, " +
+            "the better the generated documents will be. Minimum ~50 words recommended.",
+        },
+        confluence_prd_url: {
+          type: "string",
+          description:
+            "Optional URL to a Confluence PRD page for additional product context.",
+        },
+        ticket_id: {
+          type: "string",
+          description:
+            "Optional Jira ticket ID to link this bootstrap task to (e.g. PROJ-1).",
+        },
+      },
+      required: ["repo", "product_brief"],
+    },
+  },
+  {
+    name: "forge_get_plan_document",
+    description:
+      "Retrieve the content of a specific .forge/ plan document from a repository. " +
+      "Use this to review generated documents after a bootstrap or to check current plan state. " +
+      "Common documents: PRODUCT.md, ARCHITECTURE.md, API_CONTRACTS.md, DATA_MODEL.md, CONTRIBUTING.md, config.yaml.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: {
+          type: "string",
+          description: "GitHub repository in org/repo format.",
+        },
+        document: {
+          type: "string",
+          description:
+            "Document filename (e.g. PRODUCT.md, ARCHITECTURE.md, config.yaml).",
+        },
+        branch: {
+          type: "string",
+          description:
+            "Branch to read from (default: main). Use the bootstrap PR branch to review generated content before merge.",
+        },
+      },
+      required: ["repo", "document"],
+    },
+  },
+  {
+    name: "forge_bootstrap_platform",
+    description:
+      "Bootstrap a multi-repo platform (API + workers + UI, etc.) by triggering the PM agent's " +
+      "project-bootstrap skill in platform mode. All repos/directories must already be seeded with .forge/ " +
+      "directories containing a platform section in config.yaml. The PM and Architect agents " +
+      "will design a holistic architecture spanning all repos, with shared API contracts and " +
+      "event schemas. Pass any one of the platform repos or local paths — siblings are auto-discovered from config.yaml.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo: {
+          type: "string",
+          description:
+            "Any source in the platform: either a GitHub repo (org/repo) or an absolute local directory path " +
+            "(e.g. /Users/me/projects/api). Sibling sources are discovered from the platform section in config.yaml.",
+        },
+        product_brief: {
+          type: "string",
+          description:
+            "Detailed product description for the entire platform. Describe all services " +
+            "(API, workers, UI) and how they relate. Include user-facing features, " +
+            "async processing needs, and frontend requirements.",
+        },
+        confluence_prd_url: {
+          type: "string",
+          description:
+            "Optional URL to a Confluence PRD page.",
+        },
+        ticket_id: {
+          type: "string",
+          description:
+            "Optional Jira ticket ID to link this bootstrap task to.",
+        },
+      },
+      required: ["repo", "product_brief"],
+    },
+  },
+  {
     name: "forge_health",
     description:
       "Check the health of all Forge control plane services (Orchestrator, Registry, Policy Engine).",
@@ -301,6 +402,26 @@ const ListTasksInput = z.object({
 
 const SkillInput = z.object({ role: z.string(), name: z.string() });
 const RoleFilterInput = z.object({ role: z.string().optional() });
+
+const BootstrapInput = z.object({
+  repo: z.string(),
+  product_brief: z.string(),
+  confluence_prd_url: z.string().optional(),
+  ticket_id: z.string().optional(),
+});
+
+const BootstrapPlatformInput = z.object({
+  repo: z.string(),
+  product_brief: z.string(),
+  confluence_prd_url: z.string().optional(),
+  ticket_id: z.string().optional(),
+});
+
+const PlanDocumentInput = z.object({
+  repo: z.string(),
+  document: z.string(),
+  branch: z.string().optional(),
+});
 
 async function handleTool(
   name: string,
@@ -382,6 +503,65 @@ async function handleTool(
     case "forge_list_plans": {
       const plans = await forgeRequest(REGISTRY_URL, "/v1/plans");
       return JSON.stringify(plans, null, 2);
+    }
+
+    case "forge_bootstrap_project": {
+      const input = BootstrapInput.parse(args);
+      const task = await forgeRequest(ORCHESTRATOR_URL, "/v1/tasks", {
+        method: "POST",
+        body: {
+          agent_role: "pm",
+          skill_name: "project-bootstrap",
+          title: `Bootstrap plan documents for ${input.repo}`,
+          description: `Populate seeded .forge/ plan documents with content derived from the product brief. Delegate technical documents to the Architect agent.`,
+          jira_ticket_id: input.ticket_id,
+          repo: input.repo,
+          input: {
+            product_brief: input.product_brief,
+            confluence_prd_url: input.confluence_prd_url,
+            repo: input.repo,
+          },
+        },
+      });
+      return JSON.stringify(task, null, 2);
+    }
+
+    case "forge_get_plan_document": {
+      const input = PlanDocumentInput.parse(args);
+      const branch = input.branch ?? "main";
+      const path = `.forge/${input.document}`;
+      const doc = await forgeRequest(
+        ORCHESTRATOR_URL,
+        `/v1/files?repo=${encodeURIComponent(input.repo)}&path=${encodeURIComponent(path)}&ref=${encodeURIComponent(branch)}`
+      );
+      return JSON.stringify(doc, null, 2);
+    }
+
+    case "forge_bootstrap_platform": {
+      const input = BootstrapPlatformInput.parse(args);
+      // The PM agent detects platform mode from config.yaml — we just submit
+      // the task pointing at any repo in the platform. The agent reads the
+      // platform section and orchestrates across all sibling repos.
+      const task = await forgeRequest(ORCHESTRATOR_URL, "/v1/tasks", {
+        method: "POST",
+        body: {
+          agent_role: "pm",
+          skill_name: "project-bootstrap",
+          title: `Bootstrap platform plan documents (via ${input.repo})`,
+          description:
+            "Populate seeded .forge/ plan documents across all platform repos. " +
+            "Design holistic architecture with shared API contracts and event schemas. " +
+            "Delegate technical documents to the Architect agent.",
+          jira_ticket_id: input.ticket_id,
+          repo: input.repo,
+          input: {
+            product_brief: input.product_brief,
+            confluence_prd_url: input.confluence_prd_url,
+            repo: input.repo,
+          },
+        },
+      });
+      return JSON.stringify(task, null, 2);
     }
 
     case "forge_health": {

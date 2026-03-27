@@ -35,6 +35,8 @@ spec:
               value: '${TASK_PAYLOAD}'
             - name: REPO
               value: "${REPO}"
+            - name: PLATFORM_REPOS
+              value: "${PLATFORM_REPOS}"
             - name: FORGE_COMPANY_ID
               value: "${COMPANY_ID}"
             - name: FORGE_PROJECT_ID

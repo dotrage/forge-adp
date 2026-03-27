@@ -3,7 +3,12 @@
   "displayName": "Forge ADP",
   "description": "Submit tasks to Forge agents, track progress, and approve checkpoints directly from VS Code.",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "publisher": "dotrage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dotrage/forge-adp"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

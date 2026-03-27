@@ -33,6 +33,21 @@ forge:
     slack:
       channel: "{{.SlackChannel}}"
       escalation_channel: "{{.SlackChannel}}-escalations"
+{{- if .HasPlatform}}
+
+  platform:
+    id: "{{.Platform.ID}}"
+    repos:
+{{- range .Platform.Repos}}
+      - role: "{{.Role}}"
+{{- if .Repo}}
+        repo: "{{.Repo}}"
+{{- end}}
+{{- if .LocalPath}}
+        local_path: "{{.LocalPath}}"
+{{- end}}
+{{- end}}
+{{- end}}
 
   quality_gates:
     all_agents:

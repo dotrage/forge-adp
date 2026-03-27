@@ -71,10 +71,18 @@ type Task struct {
 	JiraTicketID string          `json:"jira_ticket_id"`
 	AgentRole    string          `json:"agent_role"`
 	SkillName    string          `json:"skill_name"`
+	Title        string          `json:"title,omitempty"`
+	Description  string          `json:"description,omitempty"`
 	Status       string          `json:"status"`
 	Priority     int             `json:"priority"`
 	Input        json.RawMessage `json:"input"`
 	Dependencies []string        `json:"dependencies,omitempty"`
+	// Repo is the primary repository this task operates on.
+	Repo string `json:"repo,omitempty"`
+	// PlatformRepos lists all sibling repos when the task is part of a
+	// multi-repo platform.  Agents use this to load cross-repo context
+	// via PlanReader.load_platform_plans().
+	PlatformRepos []string `json:"platform_repos,omitempty"`
 }
 
 func (o *Orchestrator) CreateTask(ctx context.Context, task Task) error {
@@ -88,11 +96,12 @@ func (o *Orchestrator) CreateTask(ctx context.Context, task Task) error {
 	// ----------------------------------------------------------------
 	if highRiskSkills[task.SkillName] && task.AgentRole != "governance" {
 		task.Status = "pending_governance"
+		platformReposJSON, _ := json.Marshal(task.PlatformRepos)
 		_, err := o.db.ExecContext(ctx,
-			`INSERT INTO tasks (id, jira_ticket_id, agent_role, skill_name, status, priority, input_payload)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			`INSERT INTO tasks (id, jira_ticket_id, agent_role, skill_name, status, priority, input_payload, repo, platform_repos)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 			task.ID, task.JiraTicketID, task.AgentRole, task.SkillName,
-			task.Status, task.Priority, task.Input)
+			task.Status, task.Priority, task.Input, task.Repo, platformReposJSON)
 		if err != nil {
 			return fmt.Errorf("insert task (pending_governance): %w", err)
 		}
@@ -134,11 +143,12 @@ func (o *Orchestrator) CreateTask(ctx context.Context, task Task) error {
 
 	// Normal (non-high-risk) path
 	task.Status = "created"
+	platformReposJSON, _ := json.Marshal(task.PlatformRepos)
 	_, err := o.db.ExecContext(ctx,
-		`INSERT INTO tasks (id, jira_ticket_id, agent_role, skill_name, status, priority, input_payload)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		`INSERT INTO tasks (id, jira_ticket_id, agent_role, skill_name, status, priority, input_payload, repo, platform_repos)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		task.ID, task.JiraTicketID, task.AgentRole, task.SkillName,
-		task.Status, task.Priority, task.Input)
+		task.Status, task.Priority, task.Input, task.Repo, platformReposJSON)
 	if err != nil {
 		return fmt.Errorf("insert task: %w", err)
 	}

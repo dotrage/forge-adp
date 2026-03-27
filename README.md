@@ -20,7 +20,7 @@ Forge ADP connects product owners to a fleet of specialized AI agents — each r
 - [Usage](#usage)
   - [Triggering via Jira](#triggering-agent-work)
   - [Triggering via Slack](#triggering-via-slack)
-  - [MCP Server (Claude Code)](#using-the-mcp-server-claude-code)
+  - [MCP Server — Claude Code](#using-the-mcp-server--claude-code)
   - [VS Code Extension](#using-the-vs-code-extension)
 - [Configuration](#configuration)
 - [API & Command Reference](#api--command-reference)
@@ -289,7 +289,7 @@ Send a message to the Forge bot in your configured Slack channel:
 
 The Slack Adapter parses the message, creates or links a Jira ticket, and hands off to the Orchestrator.
 
-### Using the MCP Server (Claude Code)
+### Using the MCP Server — Claude Code
 
 The Forge MCP server exposes the Orchestrator and Registry APIs as tools that any [Model Context Protocol](https://modelcontextprotocol.io) client can call — including **Claude Code**, Claude Desktop, and other MCP-compatible environments.
 

@@ -42,7 +42,36 @@ class ProjectBootstrapSkill(Skill):
                 "escalation": "Product brief is too vague or missing"
             }
 
+        # Detect platform mode from config
+        config = {}
+        if config_yaml:
+            try:
+                import yaml
+                config = yaml.safe_load(config_yaml) or {}
+            except Exception:
+                pass
+
+        platform = config.get("forge", {}).get("platform")
+        is_platform = platform and "repos" in platform and len(platform["repos"]) > 0
+
         system_prompt = self.build_system_prompt(context)
+
+        if is_platform:
+            return self._execute_platform(
+                context, llm, system_prompt, product_brief, repo,
+                config_yaml, product_stub, contributing_stub, platform
+            )
+        else:
+            return self._execute_single(
+                context, llm, system_prompt, product_brief, repo,
+                config_yaml, product_stub, contributing_stub
+            )
+
+    def _execute_single(
+        self, context, llm, system_prompt, product_brief, repo,
+        config_yaml, product_stub, contributing_stub
+    ) -> dict:
+        """Bootstrap a single-repo project."""
         system_prompt += (
             "\n\nYou are the Forge PM Agent running the project-bootstrap skill. "
             "Your job is to populate PRODUCT.md and CONTRIBUTING.md with substantive "
@@ -121,9 +150,137 @@ Return strictly valid JSON:
         response = llm.complete(system_prompt, messages, max_tokens=8000, temperature=0.4)
         result = self._parse_json_response(response)
 
-        # Attach metadata for the orchestrator to create architect tasks
         result["repo"] = repo
         result["documents_populated"] = ["PRODUCT.md", "CONTRIBUTING.md"]
+        result.setdefault("generated_at", datetime.now(timezone.utc).isoformat())
+        return result
+
+    def _execute_platform(
+        self, context, llm, system_prompt, product_brief, repo,
+        config_yaml, product_stub, contributing_stub, platform
+    ) -> dict:
+        """Bootstrap a multi-repo platform project."""
+        platform_id = platform.get("id", "unknown")
+        repos = platform.get("repos", [])
+
+        # Build a summary of the platform for the LLM
+        repo_summary = "\n".join(
+            f"- **{r.get('local_path') or r.get('repo', 'unknown')}** (role: {r.get('role', 'unknown')})"
+            for r in repos
+        )
+        repo_summary += "\n\nEach repo's tech stack is defined in its own .forge/config.yaml."
+
+        system_prompt += (
+            "\n\nYou are the Forge PM Agent running the project-bootstrap skill in PLATFORM MODE. "
+            f"This is a multi-repo platform ({platform_id}) with {len(repos)} repositories. "
+            "Your job is to: (1) generate a single shared PRODUCT.md for the entire platform, "
+            "(2) generate a repo-specific CONTRIBUTING.md for each repo tailored to its tech stack, "
+            "(3) prepare architect tasks that design the platform holistically across all repos. "
+            "Be concrete and specific. Replace all placeholder comments with real content."
+        )
+
+        messages = [
+            {
+                "role": "user",
+                "content": f"""
+Bootstrap plan documents for a multi-repo platform.
+
+## Product Brief
+{product_brief}
+
+## Platform Configuration
+Platform ID: {platform_id}
+
+### Repositories
+{repo_summary}
+
+## Project Config
+{config_yaml[:2000] if config_yaml else "(not available)"}
+
+## Current PRODUCT.md Stub
+{product_stub}
+
+## Current CONTRIBUTING.md Stub (from primary repo)
+{contributing_stub}
+
+## Instructions
+
+### PRODUCT.md (shared across all repos)
+Generate ONE PRODUCT.md that describes the entire platform. Populate every section:
+1. **Overview** — What the platform is and why it exists (mention it spans multiple services)
+2. **Target Users** — Who uses it and their key characteristics
+3. **Core Value Proposition** — The problem it solves
+4. **Key Features** — Bulleted list, noting which repo/service owns each feature
+5. **Success Metrics** — Measurable KPIs
+6. **Platform Architecture Summary** — Brief description of how the repos relate (API serves the UI, workers process async jobs, etc.)
+
+### CONTRIBUTING.md (one per repo)
+Generate a separate CONTRIBUTING.md for EACH repo with code style rules tailored to that repo's specific tech stack.
+Keep the existing testing requirements, PR template, branch naming, and commit message sections.
+
+### Architect Tasks
+Prepare architect tasks that receive the FULL platform context so architecture is designed holistically:
+- requirements-analysis: receives the full platform config + all repo roles
+- architecture-design: designs per-repo ARCHITECTURE.md and DATA_MODEL.md with cross-references
+- api-design: defines contracts that the UI consumes and events that workers process
+
+Return strictly valid JSON:
+{{
+  "product_md": "Full shared PRODUCT.md content",
+  "contributing_per_repo": {{
+    "<repo>": "Full CONTRIBUTING.md content for that repo"
+  }},
+  "architect_tasks": [
+    {{
+      "skill_name": "requirements-analysis",
+      "input": {{
+        "product_brief": "...",
+        "repo": "<primary repo>",
+        "platform": {{
+          "id": "{platform_id}",
+          "repos": {json.dumps(repos)}
+        }}
+      }}
+    }},
+    {{
+      "skill_name": "architecture-design",
+      "input": {{
+        "product_brief": "...",
+        "repo": "<primary repo>",
+        "platform": {{
+          "id": "{platform_id}",
+          "repos": {json.dumps(repos)}
+        }}
+      }},
+      "depends_on": "requirements-analysis"
+    }},
+    {{
+      "skill_name": "api-design",
+      "input": {{
+        "product_brief": "...",
+        "repo": "<primary repo>",
+        "platform": {{
+          "id": "{platform_id}",
+          "repos": {json.dumps(repos)}
+        }}
+      }},
+      "depends_on": "requirements-analysis"
+    }}
+  ]
+}}
+""",
+            }
+        ]
+
+        response = llm.complete(system_prompt, messages, max_tokens=8000, temperature=0.4)
+        result = self._parse_json_response(response)
+
+        result["repo"] = repo
+        result["platform_id"] = platform_id
+        result["platform_repos"] = [r.get("repo") or r.get("local_path", "unknown") for r in repos]
+        result["documents_populated"] = {
+            (r.get("repo") or r.get("local_path", "unknown")): ["PRODUCT.md", "CONTRIBUTING.md"] for r in repos
+        }
         result.setdefault("generated_at", datetime.now(timezone.utc).isoformat())
         return result
 
